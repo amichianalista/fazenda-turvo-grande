@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
+from pathlib import Path
+
 import streamlit as st
 
 
@@ -7,30 +11,40 @@ THEME_CSS = """
 <style>
     :root {
         --bg: #f6f0e6;
-        --surface: rgba(255, 250, 243, 0.78);
-        --surface-strong: #fffaf2;
-        --text: #1f2a1f;
-        --muted: #586357;
-        --green: #1f5c3f;
-        --green-soft: #2d7a54;
-        --amber: #c88d2d;
-        --earth: #8a5a34;
-        --slate: #334e4a;
-        --line: rgba(31, 42, 31, 0.08);
-        --shadow: 0 24px 60px rgba(31, 42, 31, 0.10);
+        --surface: rgba(255, 250, 243, 0.80);
+        --surface-strong: rgba(255, 250, 243, 0.92);
+        --text: #192317;
+        --muted: #5d695b;
+        --green: #173e2d;
+        --green-soft: #2f6c4d;
+        --amber: #c79a46;
+        --earth: #8f6338;
+        --slate: #314844;
+        --line: rgba(31, 42, 31, 0.10);
+        --line-strong: rgba(255, 245, 228, 0.18);
+        --shadow: 0 24px 60px rgba(10, 23, 15, 0.16);
+        --shadow-soft: 0 18px 42px rgba(8, 18, 12, 0.12);
+        --display-font: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        --body-font: "Trebuchet MS", "Segoe UI", sans-serif;
     }
 
     .stApp {
         background:
-            radial-gradient(circle at top right, rgba(200, 141, 45, 0.22), transparent 20%),
-            radial-gradient(circle at left 15%, rgba(31, 92, 63, 0.16), transparent 22%),
-            linear-gradient(180deg, #f7f2e8 0%, #f2ecdf 100%);
+            linear-gradient(180deg, rgba(6, 18, 11, 0.84) 0%, rgba(8, 20, 13, 0.78) 100%),
+            radial-gradient(circle at top right, rgba(200, 141, 45, 0.16), transparent 24%),
+            radial-gradient(circle at left 12%, rgba(31, 92, 63, 0.22), transparent 26%),
+            var(--app-bg-image);
+        background-attachment: fixed;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
         color: var(--text);
+        font-family: var(--body-font);
     }
 
     .block-container {
-        padding-top: 2.2rem;
-        padding-bottom: 3rem;
+        padding-top: 2.4rem;
+        padding-bottom: 3.6rem;
         max-width: 1220px;
     }
 
@@ -44,19 +58,31 @@ THEME_CSS = """
 
     .hero-shell {
         background:
-            linear-gradient(135deg, rgba(19, 58, 40, 0.95), rgba(35, 93, 63, 0.92)),
-            linear-gradient(180deg, rgba(200, 141, 45, 0.20), transparent);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 28px;
-        box-shadow: var(--shadow);
-        margin-bottom: 1.4rem;
+            linear-gradient(125deg, rgba(12, 34, 24, 0.94), rgba(23, 58, 40, 0.88) 48%, rgba(121, 89, 33, 0.32) 100%);
+        border: 1px solid var(--line-strong);
+        border-radius: 34px;
+        box-shadow: 0 28px 80px rgba(7, 16, 11, 0.28);
+        margin-bottom: 1.6rem;
+        min-height: 320px;
         overflow: hidden;
-        padding: 2rem 2rem 2.2rem 2rem;
+        padding: 2.3rem 2.3rem 2.5rem 2.3rem;
         position: relative;
     }
 
+    .hero-shell::before {
+        background:
+            radial-gradient(circle at 85% 20%, rgba(219, 183, 98, 0.34), transparent 24%),
+            radial-gradient(circle at 12% 110%, rgba(255, 255, 255, 0.08), transparent 22%);
+        content: "";
+        inset: 0;
+        pointer-events: none;
+        position: absolute;
+    }
+
     .hero-shell::after {
-        background: linear-gradient(90deg, rgba(200, 141, 45, 0.18), transparent);
+        background:
+            linear-gradient(90deg, rgba(200, 141, 45, 0.14), transparent 32%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 26%);
         content: "";
         inset: 0;
         pointer-events: none;
@@ -65,10 +91,10 @@ THEME_CSS = """
 
     .hero-kicker {
         color: #f6d9a1;
-        font-size: 0.82rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        margin-bottom: 0.8rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.24em;
+        margin-bottom: 0.95rem;
         position: relative;
         text-transform: uppercase;
         z-index: 1;
@@ -76,103 +102,125 @@ THEME_CSS = """
 
     .hero-title {
         color: #fff8f0;
-        font-size: 2.6rem;
+        font-family: var(--display-font);
+        font-size: clamp(2.7rem, 5vw, 4.5rem);
         font-weight: 800;
-        line-height: 1.03;
+        letter-spacing: -0.03em;
+        line-height: 0.95;
         margin: 0;
-        max-width: 760px;
+        max-width: 820px;
         position: relative;
         z-index: 1;
     }
 
     .hero-copy {
         color: rgba(255, 248, 240, 0.84);
-        font-size: 1.02rem;
-        line-height: 1.7;
-        margin-top: 0.9rem;
+        font-size: 1.04rem;
+        line-height: 1.75;
+        margin-top: 1rem;
         max-width: 720px;
         position: relative;
         z-index: 1;
     }
 
     .section-shell {
-        margin: 1.35rem 0 0.85rem 0;
+        margin: 1.5rem 0 0.95rem 0;
     }
 
     .section-title {
         color: var(--text);
-        font-size: 1.2rem;
+        font-family: var(--display-font);
+        font-size: 1.8rem;
         font-weight: 800;
-        margin-bottom: 0.2rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.28rem;
     }
 
     .section-copy {
         color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.6;
+        font-size: 0.98rem;
+        line-height: 1.68;
+        max-width: 760px;
     }
 
     .kpi-shell {
-        background: rgba(255, 250, 243, 0.88);
-        backdrop-filter: blur(8px);
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        box-shadow: var(--shadow);
-        min-height: 154px;
-        padding: 1.2rem 1.15rem 1.05rem 1.15rem;
+        background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(249, 242, 232, 0.82));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 24px;
+        box-shadow: var(--shadow-soft);
+        min-height: 164px;
+        overflow: hidden;
+        padding: 1.28rem 1.2rem 1.12rem 1.2rem;
+        position: relative;
+    }
+
+    .kpi-shell::before {
+        background: linear-gradient(90deg, rgba(47, 108, 77, 0.96), rgba(199, 154, 70, 0.72));
+        content: "";
+        height: 4px;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 
     .kpi-label {
         color: var(--muted);
-        font-size: 0.82rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
     }
 
     .kpi-value {
         color: var(--text);
-        font-size: 2rem;
+        font-family: var(--display-font);
+        font-size: clamp(2rem, 2.4vw, 2.5rem);
         font-weight: 800;
-        line-height: 1.05;
-        margin: 0.55rem 0 0.35rem 0;
+        letter-spacing: -0.03em;
+        line-height: 0.98;
+        margin: 0.72rem 0 0.42rem 0;
     }
 
     .kpi-delta {
         color: var(--green-soft);
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         font-weight: 700;
+        line-height: 1.5;
     }
 
     .panel-shell {
-        background: rgba(255, 250, 243, 0.86);
+        background: linear-gradient(180deg, rgba(255, 250, 243, 0.88), rgba(249, 243, 235, 0.80));
         border: 1px solid var(--line);
         border-radius: 24px;
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-soft);
         margin-bottom: 1rem;
-        padding: 1.25rem;
+        padding: 1.3rem;
     }
 
     .panel-kicker {
         color: var(--muted);
         font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
+        font-weight: 800;
+        letter-spacing: 0.16em;
         margin-bottom: 0.65rem;
         text-transform: uppercase;
     }
 
     .panel-title {
         color: var(--text);
-        font-size: 1.15rem;
+        font-family: var(--display-font);
+        font-size: 1.32rem;
         font-weight: 800;
-        margin-bottom: 0.35rem;
+        line-height: 1.08;
+        margin-bottom: 0.42rem;
     }
 
     .panel-copy {
         color: var(--muted);
-        font-size: 0.94rem;
-        line-height: 1.65;
+        font-size: 0.97rem;
+        line-height: 1.72;
         margin-bottom: 0;
     }
 
@@ -202,14 +250,37 @@ THEME_CSS = """
         background: rgba(255, 250, 243, 0.88);
         border: 1px solid var(--line);
         border-radius: 18px;
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-soft);
         color: var(--text);
         font-size: 0.95rem;
         font-weight: 600;
         padding: 0.95rem 1rem;
     }
+
+    @media (max-width: 900px) {
+        .hero-shell {
+            min-height: auto;
+            padding: 1.8rem 1.3rem 2rem 1.3rem;
+        }
+
+        .section-title {
+            font-size: 1.55rem;
+        }
+    }
 </style>
 """
+
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+BACKGROUND_IMAGE = ROOT_DIR / "assets" / "background.png"
+
+
+@lru_cache(maxsize=1)
+def _background_data_uri() -> str:
+    if not BACKGROUND_IMAGE.exists():
+        return "none"
+    encoded = base64.b64encode(BACKGROUND_IMAGE.read_bytes()).decode("ascii")
+    return f'url("data:image/png;base64,{encoded}")'
 
 
 def apply_theme(page_title: str, page_icon: str) -> None:
@@ -219,7 +290,8 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    st.markdown(THEME_CSS, unsafe_allow_html=True)
+    themed_css = THEME_CSS.replace("var(--app-bg-image)", _background_data_uri())
+    st.markdown(themed_css, unsafe_allow_html=True)
 
 
 def section_header(title: str, copy: str) -> None:

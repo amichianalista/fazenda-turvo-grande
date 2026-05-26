@@ -4,12 +4,18 @@ from functools import lru_cache
 from pathlib import Path
 import math
 import re
-
-import pandas as pd
+import xml.etree.ElementTree as ET
+import zipfile
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-DATA_FILE = ROOT_DIR / "data" / "planilha_gestao.csv"
+SOURCE_FILE = ROOT_DIR / "Referenciais Iniciais" / "planilha de gestao.ods"
+
+NS = {
+    "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+    "table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+    "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+}
 
 
 def _first_number(text: str | None) -> float | None:
@@ -48,287 +54,173 @@ def _to_percent(value: float | None) -> str:
     return f"{value:.1f}%".replace(".", ",")
 
 
-@lru_cache(maxsize=1)
-def load_reference_data() -> pd.DataFrame:
-    if not DATA_FILE.exists():
-        return pd.DataFrame(columns=["aba", "secao", "campo", "valor", "observacao", "status"])
-    return pd.read_csv(DATA_FILE, encoding="utf-8-sig")
+def _normalize_label(value: str) -> str:
+    return " ".join(value.replace("\n", " ").split()).strip()
+
+
+def _cell_text(cell: ET.Element) -> str:
+    parts = []
+    for paragraph in cell.findall(".//text:p", NS):
+        parts.append("".join(paragraph.itertext()))
+    return "\n".join(part for part in parts if part).strip()
 
 
 @lru_cache(maxsize=1)
-def _field_lookup() -> dict[str, dict[str, str]]:
-    df = load_reference_data()
+def _sheet_rows() -> dict[str, list[list[str]]]:
+    if not SOURCE_FILE.exists():
+        return {}
+
+    with zipfile.ZipFile(SOURCE_FILE) as archive:
+        root = ET.fromstring(archive.read("content.xml"))
+
+    spreadsheet = root.find("office:body/office:spreadsheet", NS)
+    if spreadsheet is None:
+        return {}
+
+    workbook: dict[str, list[list[str]]] = {}
+    table_name_attr = f"{{{NS['table']}}}name"
+    repeat_cols_attr = f"{{{NS['table']}}}number-columns-repeated"
+
+    for table in spreadsheet.findall("table:table", NS):
+        name = table.get(table_name_attr, "Sem nome")
+        rows: list[list[str]] = []
+
+        for row in table.findall("table:table-row", NS):
+            values: list[str] = []
+            for cell in row.findall("table:table-cell", NS):
+                repeat_cols = int(cell.get(repeat_cols_attr, "1"))
+                text = _cell_text(cell)
+                values.extend([text] * repeat_cols)
+
+            while values and values[-1] == "":
+                values.pop()
+
+            if any(values):
+                rows.append(values)
+
+        workbook[name] = rows
+
+    return workbook
+
+
+def _rows(sheet_name: str) -> list[list[str]]:
+    return _sheet_rows().get(sheet_name, [])
+
+
+@lru_cache(maxsize=1)
+def identity_context() -> dict[str, str]:
+    rows = _rows("1. O que a gente já sabe")
+    header = rows[0][0] if rows and rows[0] else ""
+    parts = [part.strip() for part in header.split("·")]
+
+    operation_name = parts[0].title() if parts else "Operacao nao mapeada"
+    product_name = parts[1] if len(parts) > 1 else "Produto nao mapeado"
+    location = parts[2] if len(parts) > 2 else "Localidade nao mapeada"
+
     return {
-        str(row["campo"]): row.to_dict()
-        for _, row in df.iterrows()
-        if pd.notna(row.get("campo"))
+        "headline": header,
+        "operation_name": operation_name,
+        "product_name": product_name,
+        "location": location,
     }
 
 
-def _field_text(field: str) -> str | None:
-    record = _field_lookup().get(field)
-    if not record:
-        return None
-    value = record.get("valor")
-    if pd.isna(value) or value == "":
-        return None
-    return str(value)
+@lru_cache(maxsize=1)
+def sheet_one_blocks() -> dict[str, dict[str, str]]:
+    rows = _rows("1. O que a gente já sabe")
+    sections = {"PRODUÇÃO", "VENDA", "RESULTADO"}
+    current_section = ""
+    questions: dict[str, str] = {}
+    sales: dict[str, str] = {}
+    results: dict[str, str] = {}
 
+    for row in rows:
+        label = _normalize_label(row[0]) if row else ""
+        if any(section in label for section in sections):
+            if "PRODUÇÃO" in label:
+                current_section = "production"
+            elif "VENDA" in label:
+                current_section = "sales"
+            elif "RESULTADO" in label:
+                current_section = "results"
+            continue
 
-def _field_number(field: str) -> float | None:
-    return _first_number(_field_text(field))
+        if len(row) >= 3 and _normalize_label(row[1]) == "Pergunta":
+            continue
+
+        if current_section in {"production", "sales"} and len(row) >= 3 and row[1]:
+            target = questions if current_section == "production" else sales
+            target[_normalize_label(row[1])] = _normalize_label(row[2])
+
+        if current_section == "results" and len(row) >= 3 and row[1]:
+            results[_normalize_label(row[1])] = _normalize_label(row[2])
+
+    return {
+        "production": questions,
+        "sales": sales,
+        "results": results,
+    }
 
 
 def production_metrics() -> dict[str, float | str | None]:
-    dias_semana = _field_number("Dias por semana de produção")
-    queijos_dia = _field_number("Queijos por dia")
-    peso_medio_kg = _field_number("Peso médio por queijo")
-    queijos_semana = _field_number("Queijos por semana")
-    queijos_mes = _field_number("Queijos por mês")
-    kg_mes = _field_number("Kg de queijo por mês")
-    receita_bruta = _field_number("Receita bruta mensal estimada")
-    preco_kg = _field_number("Preço por kg pago pela cooperativa")
-    pct_cooperativa = _field_number("Percentual vendido para cooperativa")
+    blocks = sheet_one_blocks()
+    production = blocks["production"]
+    results = blocks["results"]
 
-    capacidade_produtiva = None
-    evolucao_pct = None
+    dias_semana_text = production.get("Quantos dias por semana a senhora faz queijo?")
+    queijos_dia_text = production.get("Quantos queijos saem prontos por dia de produção?")
+    peso_medio_text = production.get("Quanto pesa cada queijo em média?")
 
     return {
-        "dias_semana": dias_semana,
-        "queijos_dia": queijos_dia,
-        "peso_medio_kg": peso_medio_kg,
-        "queijos_semana": queijos_semana,
-        "queijos_mes": queijos_mes,
-        "kg_mes": kg_mes,
-        "receita_bruta": receita_bruta,
-        "preco_kg": preco_kg,
-        "pct_cooperativa": pct_cooperativa,
-        "capacidade_produtiva": capacidade_produtiva,
-        "evolucao_pct": evolucao_pct,
+        "dias_semana": _first_number(dias_semana_text),
+        "dias_semana_text": dias_semana_text,
+        "queijos_dia": _first_number(queijos_dia_text),
+        "queijos_dia_text": queijos_dia_text,
+        "peso_medio_kg": _first_number(peso_medio_text),
+        "peso_medio_kg_text": peso_medio_text,
+        "queijos_semana": _first_number(results.get("Queijos por semana")),
+        "queijos_semana_text": results.get("Queijos por semana"),
+        "queijos_mes": _first_number(results.get("Queijos por mês")),
+        "queijos_mes_text": results.get("Queijos por mês"),
+        "kg_mes": _first_number(results.get("Kg de queijo por mês")),
+        "kg_mes_text": results.get("Kg de queijo por mês"),
     }
 
 
-def production_snapshot_chart() -> pd.DataFrame:
-    metrics = production_metrics()
-    rows = []
-    mapping = [
-        ("Queijos por dia", metrics["queijos_dia"]),
-        ("Queijos por semana", metrics["queijos_semana"]),
-        ("Queijos por mes", metrics["queijos_mes"]),
-    ]
-    for label, value in mapping:
-        if value is not None:
-            rows.append({"indicador": label, "valor": value})
-    return pd.DataFrame(rows)
+def commercial_metrics() -> dict[str, float | str | None]:
+    blocks = sheet_one_blocks()
+    sales = blocks["sales"]
+    results = blocks["results"]
 
+    preco_text = sales.get("Quanto a cooperativa paga por kg do queijo?")
+    pct_text = sales.get("Qual % do queijo vai para a cooperativa?")
+    receita_text = results.get("💰 RECEITA BRUTA DO MÊS")
 
-def production_page_status() -> pd.DataFrame:
-    metrics = production_metrics()
-    rows = [
-        ("Queijos/dia", metrics["queijos_dia"], "ok" if metrics["queijos_dia"] is not None else "faltando"),
-        ("Kg/mes", metrics["kg_mes"], "ok" if metrics["kg_mes"] is not None else "faltando"),
-        ("Evolucao da producao", metrics["evolucao_pct"], "faltando"),
-        ("Capacidade produtiva", metrics["capacidade_produtiva"], "faltando"),
-    ]
-    return pd.DataFrame(rows, columns=["campo", "valor", "status"])
-
-
-def cost_items() -> pd.DataFrame:
-    df = load_reference_data()
-    costs = df[df["aba"] == "2. O que a gente gasta"].copy()
-    costs = costs[costs["secao"].isin(["CUSTOS QUE JÁ SABEMOS", "CUSTOS A DESCOBRIR"])].copy()
-    costs["valor_num"] = costs["valor"].apply(_first_number)
-    costs["tem_valor"] = costs["valor_num"].notna() & (costs["valor_num"] > 0)
-    costs["categoria"] = costs["campo"].fillna("").astype(str)
-    costs["grupo"] = costs["secao"].map(
-        {
-            "CUSTOS QUE JÁ SABEMOS": "Conhecidos",
-            "CUSTOS A DESCOBRIR": "A descobrir",
-        }
-    )
-    return costs[
-        ["categoria", "grupo", "valor", "valor_num", "observacao", "status", "tem_valor"]
-    ].reset_index(drop=True)
-
-
-def cost_coverage_metrics() -> dict[str, float | int | None]:
-    costs = cost_items()
-    total = len(costs)
-    filled = int(costs["tem_valor"].sum())
-    pending = total - filled
-    known = int((costs["grupo"] == "Conhecidos").sum())
-    unknown = int((costs["grupo"] == "A descobrir").sum())
-    filled_pct = (filled / total * 100) if total else 0.0
     return {
-        "total_categorias": total,
-        "categorias_com_valor": filled,
-        "categorias_sem_valor": pending,
-        "categorias_conhecidas": known,
-        "categorias_a_descobrir": unknown,
-        "percentual_preenchido": filled_pct,
+        "preco_kg": _first_number(preco_text),
+        "preco_kg_text": preco_text,
+        "pct_cooperativa": _first_number(pct_text),
+        "pct_cooperativa_text": pct_text,
+        "receita_bruta": _first_number(receita_text),
+        "receita_bruta_text": receita_text,
+        "canal": "Cooperativa",
     }
-
-
-def cost_visibility() -> pd.DataFrame:
-    coverage = cost_coverage_metrics()
-    return pd.DataFrame(
-        {
-            "status": ["Com valor", "Sem valor"],
-            "valor": [
-                coverage["categorias_com_valor"],
-                coverage["categorias_sem_valor"],
-            ],
-        }
-    )
-
-
-def cost_group_chart() -> pd.DataFrame:
-    costs = cost_items()
-    return (
-        costs.groupby("grupo", as_index=False)
-        .agg(quantidade=("categoria", "count"))
-        .sort_values("quantidade", ascending=False)
-    )
-
-
-def cost_breakdown() -> pd.DataFrame:
-    costs = cost_items()
-    return costs[costs["tem_valor"]][["categoria", "valor_num"]].rename(
-        columns={"valor_num": "valor"}
-    )
-
-
-def financial_metrics() -> dict[str, float | None]:
-    production = production_metrics()
-    costs = cost_breakdown()
-    receita_bruta = production["receita_bruta"]
-    custos = float(costs["valor"].sum()) if not costs.empty else None
-    lucro_liquido = None
-    margem = None
-    if receita_bruta is not None and custos is not None:
-        lucro_liquido = receita_bruta - custos
-        margem = (lucro_liquido / receita_bruta * 100) if receita_bruta else None
-    return {
-        "receita_bruta": receita_bruta,
-        "custos": custos,
-        "lucro_liquido": lucro_liquido,
-        "margem": margem,
-    }
-
-
-def financial_page_status() -> pd.DataFrame:
-    metrics = financial_metrics()
-    rows = [
-        ("Receita bruta", metrics["receita_bruta"], "ok" if metrics["receita_bruta"] is not None else "faltando"),
-        ("Custos", metrics["custos"], "ok" if metrics["custos"] is not None else "faltando"),
-        ("Lucro liquido", metrics["lucro_liquido"], "ok" if metrics["lucro_liquido"] is not None else "faltando"),
-        ("Margem", metrics["margem"], "ok" if metrics["margem"] is not None else "faltando"),
-    ]
-    return pd.DataFrame(rows, columns=["campo", "valor", "status"])
-
-
-def financial_availability_chart() -> pd.DataFrame:
-    status = financial_page_status()
-    return (
-        status.groupby("status", as_index=False)
-        .agg(quantidade=("campo", "count"))
-        .sort_values("quantidade", ascending=False)
-    )
-
-
-def diagnosis_cards() -> list[dict[str, str]]:
-    production = production_metrics()
-    finance = financial_metrics()
-    costs = cost_items()
-
-    cards: list[dict[str, str]] = []
-
-    if production["queijos_dia"] is not None and production["kg_mes"] is not None:
-        cards.append(
-            {
-                "title": "Producao atual ja mapeada",
-                "copy": (
-                    f"A base ja sustenta uma leitura inicial de {int(production['queijos_dia'])} "
-                    f"queijos por dia e {production['kg_mes']:.0f} kg por mes."
-                ),
-                "tone": "green",
-            }
-        )
-
-    if finance["margem"] is None:
-        cards.append(
-            {
-                "title": "Margem ainda indisponivel",
-                "copy": "A margem nao pode ser calculada enquanto os custos mensais continuarem sem valor preenchido.",
-                "tone": "amber",
-            }
-        )
-
-    if not costs[costs["categoria"].str.contains("Frete", case=False, na=False)]["tem_valor"].any():
-        cards.append(
-            {
-                "title": "Frete segue sem valor",
-                "copy": "A categoria de frete existe na estrutura, mas ainda nao tem numero para entrar no diagnostico real.",
-                "tone": "earth",
-            }
-        )
-
-    if not costs[costs["categoria"].str.contains("Energia", case=False, na=False)]["tem_valor"].any():
-        cards.append(
-            {
-                "title": "Energia ainda nao mapeada",
-                "copy": "O custo energetico aparece como lacuna explicita e hoje e um dos melhores candidatos para proxima coleta.",
-                "tone": "slate",
-            }
-        )
-
-    return cards
-
-
-def action_priorities() -> pd.DataFrame:
-    costs = cost_items()
-    rows = []
-
-    for _, row in costs.iterrows():
-        if row["tem_valor"]:
-            continue
-        base_score = 92 if row["grupo"] == "Conhecidos" else 76
-        if "Frete" in row["categoria"]:
-            base_score = 95
-        if "Energia" in row["categoria"]:
-            base_score = 88
-        rows.append({"frente": row["categoria"], "prioridade": base_score})
-
-    rows.extend(
-        [
-            {"frente": "Historico de producao", "prioridade": 83},
-            {"frente": "Capacidade produtiva", "prioridade": 79},
-        ]
-    )
-
-    return pd.DataFrame(rows).sort_values("prioridade", ascending=False).reset_index(drop=True)
 
 
 def overview_metrics() -> dict[str, str]:
     production = production_metrics()
-    finance = financial_metrics()
-    coverage = cost_coverage_metrics()
-
-    margin_label = _to_percent(finance["margem"])
-    if finance["margem"] is None:
-        margin_delta = "Custos ainda nao preenchidos"
-    else:
-        margin_delta = "Margem calculada pela base atual"
+    commercial = commercial_metrics()
 
     return {
+        "operation_name": identity_context()["operation_name"],
+        "product_name": identity_context()["product_name"],
+        "location": identity_context()["location"],
         "queijos_dia": _to_number(production["queijos_dia"], suffix=" un."),
-        "queijos_dia_delta": "Snapshot real da planilha",
-        "receita_bruta": _to_currency(finance["receita_bruta"]),
-        "receita_bruta_delta": "Estimativa mensal atual",
-        "margem": margin_label,
-        "margem_delta": margin_delta,
-        "custos_cobertura": f"{coverage['categorias_com_valor']}/{coverage['total_categorias']}",
-        "custos_cobertura_delta": "Categorias com valor monetizado",
+        "queijos_mes": _to_number(production["queijos_mes"], suffix=" un."),
+        "kg_mes": _to_number(production["kg_mes"], decimals=1, suffix=" kg"),
+        "receita_bruta": _to_currency(commercial["receita_bruta"]),
+        "preco_kg": _to_currency(commercial["preco_kg"]),
+        "pct_cooperativa": _to_percent(commercial["pct_cooperativa"]),
     }
 
 
