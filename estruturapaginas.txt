@@ -1,0 +1,28 @@
+## Página 1 — Produção
+
+- Queijos/dia
+- Kg/mês
+- Evolução da produção
+- Capacidade produtiva
+
+## Página 2 — Financeiro
+
+- Receita bruta
+- Custos
+- Lucro líquido
+- Margem
+
+## Página 3 — Custos
+
+- Gráfico pizza dos custos
+- Custos conhecidos vs desconhecidos
+- Alertas de custo alto
+
+## Página 4 — Diagnóstico Inteligente
+
+Exemplo:
+
+- “Frete representa 18% do custo total”
+- “Margem abaixo do ideal”
+- “Produção alta, mas preço baixo”
+- “Custo energético ainda não mapeado”

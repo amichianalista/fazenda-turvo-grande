@@ -1,0 +1,30 @@
+aba,secao,campo,valor,observacao,status
+1. O que a gente já sabe,Produção,Dias por semana de produção,7 dias/semana,Dias que a fazenda produz por semana,preenchido
+1. O que a gente já sabe,Produção,Queijos por dia,22 queijos/dia,Volume diário de queijos,preenchido
+1. O que a gente já sabe,Produção,Peso médio por queijo,"1,0 kg por queijo","Peso médio de cada peça — o Serro costuma ter entre 0,8 e 1,2 kg",preenchido
+1. O que a gente já sabe,Financeiro,Preço por kg pago pela cooperativa,"R$ 35,00/kg",Preço recebido por kg,preenchido
+1. O que a gente já sabe,Financeiro,Percentual vendido para cooperativa,100% vai para a cooperativa,100 = tudo vai para a cooperativa,preenchido
+1. O que a gente já sabe,Resumo,Queijos por semana,154 queijos/semana,,calculado
+1. O que a gente já sabe,Resumo,Queijos por mês,616 queijos/mês,,calculado
+1. O que a gente já sabe,Resumo,Kg de queijo por mês,"616,0 kg/mês",,calculado
+1. O que a gente já sabe,Resumo,Receita bruta mensal estimada,"R$ 21.560,00",,calculado
+2. O que a gente gasta,CUSTOS QUE JÁ SABEMOS,🧂 Sal e coalho,,Nota fiscal ÷ meses que dura,✏️ preencher
+2. O que a gente gasta,CUSTOS QUE JÁ SABEMOS,🪣 Embalagem e rótulo,,Custo unitário × queijos por mês,✏️ preencher
+2. O que a gente gasta,CUSTOS QUE JÁ SABEMOS,👷 Mão de obra (quem ajuda na produção),,Salário ou diária × dias no mês,✏️ preencher
+2. O que a gente gasta,CUSTOS QUE JÁ SABEMOS,🚛 Frete para a cooperativa,,Valor por viagem × viagens no mês,✏️ preencher
+2. O que a gente gasta,CUSTOS A DESCOBRIR,"⚡ Energia elétrica (câmara fria, ordenha)",,Conta de luz — % estimado da produção de queijo,⏳ descobrir depois
+2. O que a gente gasta,CUSTOS A DESCOBRIR,"🐄 Alimentação do gado (ração, sal mineral)",,Nota fiscal de ração ÷ litros de leite produzidos,⏳ descobrir depois
+2. O que a gente gasta,CUSTOS A DESCOBRIR,🔧 Manutenção de equipamentos,,Média dos últimos meses de conserto e peças,⏳ descobrir depois
+2. O que a gente gasta,CUSTOS A DESCOBRIR,💊 Veterinário e sanidade do rebanho,,Gastos veterinários — média mensal,⏳ descobrir depois
+2. O que a gente gasta,CUSTOS A DESCOBRIR,🏛️,,Verificar no contrato com a cooperativa,⏳ descobrir depois
+2. O que a gente gasta,RESUMO DOS CUSTOS,Custos que já sabemos,"R$ 0,00",,resumo
+2. O que a gente gasta,RESUMO DOS CUSTOS,Custos a descobrir,"R$ 0,00",,resumo
+2. O que a gente gasta,RESUMO DOS CUSTOS,💸,"R$ 0,00",,resumo
+3. O número que importa,Resumo visual,🧀,0 queijos,,placeholder
+3. O número que importa,Resumo visual,⚖️,"0,0 kg",,placeholder
+3. O número que importa,Resumo visual,💰,"R$ 0,00",,placeholder
+3. O número que importa,Resumo visual,💸,"R$ 0,00",,placeholder
+3. O número que importa,Resumo visual,⏳,"R$ 0,00",,placeholder
+3. O número que importa,Resumo visual,📊,"R$ 0,00",,placeholder
+3. O número que importa,Resumo visual,✅,"R$ 0,00",,placeholder
+3. O número que importa,Resumo visual,📈,"0,0%",,placeholder

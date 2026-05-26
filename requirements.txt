@@ -1,0 +1,4 @@
+# Dependencias base para a visualizacao em Streamlit
+streamlit
+pandas
+plotly

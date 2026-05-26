@@ -1,0 +1,26 @@
+Dados faltantes para completar o app Streamlit
+
+1. Producao
+- Serie historica de producao por periodo
+- Capacidade produtiva atual ou meta mensal
+
+2. Custos conhecidos que existem na estrutura, mas ainda sem valor
+- Sal e coalho
+- Embalagem e rotulo
+- Mao de obra
+- Frete para a cooperativa
+
+3. Custos a descobrir e preencher
+- Energia eletrica
+- Alimentacao do gado
+- Manutencao de equipamentos
+- Veterinario e sanidade do rebanho
+- Custo ligado ao contrato/cooperativa que esta sem rotulo textual claro
+
+4. Impacto direto no app
+- Sem os custos preenchidos nao calculamos:
+  lucro liquido
+  margem
+  grafico real de distribuicao de custos
+  alertas percentuais de custo
+  diagnosticos financeiros completos
