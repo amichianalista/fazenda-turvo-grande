@@ -53,14 +53,14 @@ def _first_number(text: str | None) -> float | None:
 
 def _to_currency(value: float | None) -> str:
     if value is None or math.isnan(value):
-        return "Nao mapeado"
+        return "Não mapeado"
     integer = f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"R$ {integer}"
 
 
 def _to_number(value: float | None, decimals: int = 0, suffix: str = "") -> str:
     if value is None or math.isnan(value):
-        return "Nao mapeado"
+        return "Não mapeado"
     if decimals == 0:
         base = f"{int(round(value)):,}".replace(",", ".")
     else:
@@ -70,7 +70,7 @@ def _to_number(value: float | None, decimals: int = 0, suffix: str = "") -> str:
 
 def _to_percent(value: float | None) -> str:
     if value is None or math.isnan(value):
-        return "Nao mapeado"
+        return "Não mapeado"
     return f"{value:.1f}%".replace(".", ",")
 
 
@@ -146,9 +146,9 @@ def identity_context() -> dict[str, str]:
     header = rows[0][0] if rows and rows[0] else ""
     parts = [part.strip() for part in header.split("·")] if header else []
 
-    operation_name = parts[0].title() if parts else "Operacao nao mapeada"
-    product_name = parts[1] if len(parts) > 1 else "Produto nao mapeado"
-    location = parts[2] if len(parts) > 2 else "Localidade nao mapeada"
+    operation_name = parts[0].title() if parts else "Operação não mapeada"
+    product_name = parts[1] if len(parts) > 1 else "Produto não mapeado"
+    location = parts[2] if len(parts) > 2 else "Localidade não mapeada"
 
     return {
         "headline": header,
@@ -269,8 +269,8 @@ def cost_entries() -> list[dict[str, str | bool | float | None]]:
             {
                 "group": current_group,
                 "category": _clean_cost_label(name),
-                "value_text": value_text or "Nao preenchido",
-                "method_text": method_text or "Sem orientacao",
+                "value_text": value_text or "Não preenchido",
+                "method_text": method_text or "Sem orientação",
                 "status_text": status_text or "Sem status",
                 "value_numeric": numeric_value,
                 "has_value": numeric_value is not None,
@@ -319,8 +319,8 @@ def management_readiness() -> dict[str, object]:
         "known_count": metrics["known_count"],
         "discover_count": metrics["discover_count"],
         "message": (
-            "A producao e a receita ja estao na mao. O que ainda segura o lucro real "
-            "e fechar os custos que faltam entrar no caderno."
+            "A produção e a receita já estão na mão. O que ainda segura o lucro real "
+            "é fechar os custos que faltam entrar no caderno."
         ),
     }
 
@@ -329,7 +329,7 @@ def management_readiness() -> dict[str, object]:
 def opportunities() -> list[dict[str, str]]:
     return [
         {
-            "title": "Vender um pedaco em canal direto",
+            "title": "Vender um pedaço em canal direto",
             "copy": (
                 "Sem mexer em tudo de uma vez, a fazenda pode testar um canal pequeno "
                 "de venda direta e aprender onde o produto ganha mais valor."
@@ -338,15 +338,15 @@ def opportunities() -> list[dict[str, str]]:
         {
             "title": "Criar uma linha mais valorizada",
             "copy": (
-                "O queijo tem origem forte e historia boa. Com maturacao bem cuidada, "
-                "pode entrar numa faixa de preco mais nobre."
+                "O queijo tem origem forte e história boa. Com maturação bem cuidada, "
+                "pode entrar numa faixa de preço mais nobre."
             ),
         },
         {
             "title": "Fechar o custo antes de acelerar",
             "copy": (
                 "O melhor ganho agora talvez nem seja vender mais, e sim entender direito "
-                "quanto sobra por mes para decidir com seguranca."
+                "quanto sobra por mês para decidir com segurança."
             ),
         },
     ]
@@ -355,16 +355,16 @@ def opportunities() -> list[dict[str, str]]:
 def producer_messages() -> list[dict[str, str]]:
     return [
         {
-            "title": "Produz todo dia, com cadencia boa",
-            "copy": "A rotina de producao esta firme. Isso e base boa para crescer sem dar tranco.",
+            "title": "Produz todo dia, com cadência boa",
+            "copy": "A rotina de produção está firme. Isso é base boa para crescer sem dar tranco.",
         },
         {
-            "title": "Hoje o dinheiro entra por um canal so",
-            "copy": "A cooperativa resolve a saida, mas deixa a fazenda dependente de um unico caminho.",
+            "title": "Hoje o dinheiro entra por um canal só",
+            "copy": "A cooperativa resolve a saída, mas deixa a fazenda dependente de um único caminho.",
         },
         {
-            "title": "O produto ja tem base para ganhar mais valor",
-            "copy": "Com origem forte e ritmo constante, o proximo salto pode vir mais do canal do que do volume.",
+            "title": "O produto já tem base para ganhar mais valor",
+            "copy": "Com origem forte e ritmo constante, o próximo salto pode vir mais do canal do que do volume.",
         },
     ]
 

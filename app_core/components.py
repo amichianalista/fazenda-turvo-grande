@@ -7,7 +7,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 import streamlit as st
 
-from app_core.data import BACKGROUND_IMAGE, PRODUCT_IMAGE
+from app_core.data import BACKGROUND_IMAGE
 
 
 @lru_cache(maxsize=8)
@@ -23,7 +23,7 @@ def _image_data_uri(path: str) -> str:
 def _theme_css() -> str:
     background_uri = _image_data_uri(str(BACKGROUND_IMAGE))
     background_rule = (
-        f'background-image: linear-gradient(rgba(8, 20, 12, 0.78), rgba(8, 20, 12, 0.82)), url("{background_uri}");'
+        f'background-image: linear-gradient(rgba(8, 20, 12, 0.34), rgba(8, 20, 12, 0.42)), url("{background_uri}");'
         if background_uri
         else "background: linear-gradient(180deg, #102515 0%, #1b3d24 100%);"
     )
@@ -31,18 +31,16 @@ def _theme_css() -> str:
     return f"""
     <style>
         :root {{
-            --paper: rgba(10, 24, 14, 0.18);
-            --paper-strong: rgba(255, 251, 243, 0.10);
-            --paper-soft: rgba(255, 251, 243, 0.08);
+            --paper: rgba(10, 24, 14, 0.10);
+            --paper-strong: rgba(255, 251, 243, 0.08);
+            --paper-soft: rgba(255, 251, 243, 0.06);
             --ink: #fff7ea;
-            --muted: rgba(255, 247, 234, 0.74);
+            --muted: rgba(255, 247, 234, 0.78);
             --line: rgba(255, 255, 255, 0.12);
             --gold: #c79a47;
-            --gold-soft: #e0bc79;
-            --green: #214a2d;
             --green-soft: #3f7851;
-            --danger: #8c5536;
-            --shadow: 0 18px 34px rgba(7, 17, 10, 0.14);
+            --shadow: 0 12px 22px rgba(7, 17, 10, 0.08);
+            --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.10);
             --display-font: "Georgia", "Palatino Linotype", serif;
             --body-font: "Trebuchet MS", "Segoe UI", sans-serif;
         }}
@@ -62,22 +60,23 @@ def _theme_css() -> str:
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(circle at 18% 18%, rgba(221, 184, 110, 0.12), transparent 28%),
-                radial-gradient(circle at 82% 20%, rgba(98, 151, 95, 0.10), transparent 20%);
+                radial-gradient(circle at 18% 18%, rgba(221, 184, 110, 0.08), transparent 34%),
+                radial-gradient(circle at 82% 20%, rgba(98, 151, 95, 0.06), transparent 24%),
+                linear-gradient(180deg, rgba(8, 20, 12, 0.02), rgba(8, 20, 12, 0.08));
             pointer-events: none;
             z-index: 0;
         }}
 
         .block-container {{
             max-width: 1280px;
-            padding-top: 1.6rem;
+            padding-top: 2.8rem;
             padding-bottom: 3rem;
             position: relative;
             z-index: 1;
         }}
 
         [data-testid="stSidebar"] {{
-            background: linear-gradient(180deg, rgba(15, 34, 20, 0.98), rgba(10, 23, 14, 0.98));
+            background: linear-gradient(180deg, rgba(15, 34, 20, 0.92), rgba(10, 23, 14, 0.92));
             border-right: 1px solid rgba(255, 255, 255, 0.06);
         }}
 
@@ -100,6 +99,7 @@ def _theme_css() -> str:
             border-radius: 22px;
             padding: 1rem 1rem 1.1rem 1rem;
             margin-bottom: 1rem;
+            backdrop-filter: blur(8px);
         }}
 
         .sidebar-kicker {{
@@ -120,7 +120,7 @@ def _theme_css() -> str:
         }}
 
         .sidebar-copy {{
-            color: rgba(255, 247, 234, 0.78);
+            color: rgba(255, 247, 234, 0.80);
             font-size: 0.93rem;
             line-height: 1.58;
             margin-top: 0.7rem;
@@ -144,15 +144,15 @@ def _theme_css() -> str:
         }}
 
         .hero-shell {{
-            background: linear-gradient(145deg, rgba(9, 23, 13, 0.28), rgba(22, 48, 29, 0.18));
+            background: linear-gradient(145deg, rgba(9, 23, 13, 0.12), rgba(22, 48, 29, 0.06));
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 34px;
-            box-shadow: 0 24px 48px rgba(7, 17, 10, 0.16);
+            box-shadow: 0 14px 26px rgba(7, 17, 10, 0.09), var(--glass-highlight);
             padding: 2rem;
             overflow: hidden;
             position: relative;
-            margin-bottom: 1.2rem;
-            backdrop-filter: blur(8px);
+            margin-bottom: 1.35rem;
+            backdrop-filter: blur(4px);
         }}
 
         .hero-shell::after {{
@@ -160,8 +160,8 @@ def _theme_css() -> str:
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(circle at right top, rgba(214, 175, 98, 0.18), transparent 28%),
-                linear-gradient(90deg, rgba(214, 175, 98, 0.08), transparent 42%);
+                radial-gradient(circle at right top, rgba(214, 175, 98, 0.12), transparent 32%),
+                linear-gradient(90deg, rgba(214, 175, 98, 0.04), transparent 46%);
             pointer-events: none;
         }}
 
@@ -182,6 +182,16 @@ def _theme_css() -> str:
             text-transform: uppercase;
         }}
 
+        .hero-title-card {{
+            background: linear-gradient(180deg, rgba(8, 21, 12, 0.20), rgba(8, 21, 12, 0.10));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 28px;
+            box-shadow: 0 14px 24px rgba(7, 17, 10, 0.08), var(--glass-highlight);
+            padding: 1.25rem 1.4rem 1.35rem 1.4rem;
+            width: min(100%, 980px);
+            backdrop-filter: blur(6px);
+        }}
+
         .hero-title {{
             color: #fff7ea;
             font-family: var(--display-font);
@@ -193,21 +203,11 @@ def _theme_css() -> str:
             max-width: 920px;
         }}
 
-        .hero-title-card {{
-            background: linear-gradient(180deg, rgba(8, 21, 12, 0.42), rgba(8, 21, 12, 0.24));
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(7, 17, 10, 0.16);
-            padding: 1.25rem 1.4rem 1.35rem 1.4rem;
-            width: min(100%, 980px);
-            backdrop-filter: blur(10px);
-        }}
-
         .hero-copy {{
-            color: rgba(255, 247, 234, 0.82);
+            color: rgba(255, 247, 234, 0.84);
             font-size: 1rem;
             line-height: 1.72;
-            margin-top: 0.9rem;
+            margin-top: 1rem;
             max-width: 860px;
         }}
 
@@ -221,28 +221,31 @@ def _theme_css() -> str:
 
         .badge-pill {{
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.10);
             color: #fff7ea;
             font-size: 0.8rem;
             font-weight: 700;
             padding: 0.45rem 0.72rem;
+            backdrop-filter: blur(5px);
+            box-shadow: var(--glass-highlight);
         }}
 
         .hero-stats {{
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.9rem;
-            margin-top: 1.2rem;
+            margin-top: 1.35rem;
             width: min(100%, 980px);
         }}
 
         .hero-stat {{
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 20px;
             padding: 0.9rem;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(6px);
+            box-shadow: var(--glass-highlight);
         }}
 
         .hero-stat-label {{
@@ -263,7 +266,7 @@ def _theme_css() -> str:
         }}
 
         .hero-stat-note {{
-            color: rgba(255, 247, 234, 0.72);
+            color: rgba(255, 247, 234, 0.74);
             font-size: 0.9rem;
             line-height: 1.45;
             margin-top: 0.35rem;
@@ -277,14 +280,12 @@ def _theme_css() -> str:
         }}
 
         .hero-note-card {{
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 24px;
-            backdrop-filter: blur(10px);
-        }}
-
-        .hero-note-card {{
             padding: 1rem;
+            backdrop-filter: blur(6px);
+            box-shadow: var(--glass-highlight);
         }}
 
         .hero-note-title {{
@@ -297,14 +298,19 @@ def _theme_css() -> str:
         }}
 
         .hero-note-copy {{
-            color: rgba(255, 247, 234, 0.75);
+            color: rgba(255, 247, 234, 0.76);
             font-size: 0.94rem;
             line-height: 1.62;
             margin-top: 0.55rem;
         }}
 
         .section-block {{
-            margin: 1.55rem 0 0.85rem 0;
+            margin: 1.65rem 0 0.95rem 0;
+            padding: 0.8rem 1rem;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(4px);
         }}
 
         .section-kicker {{
@@ -326,7 +332,7 @@ def _theme_css() -> str:
         }}
 
         .section-copy {{
-            color: rgba(251, 247, 237, 0.82);
+            color: rgba(251, 247, 237, 0.84);
             font-size: 0.98rem;
             line-height: 1.7;
             margin-top: 0.55rem;
@@ -342,12 +348,16 @@ def _theme_css() -> str:
             box-shadow: var(--shadow);
             padding: 1.15rem;
             height: 100%;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(6px);
+            box-shadow: var(--shadow), var(--glass-highlight);
         }}
 
         .metric-card {{
             position: relative;
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.028);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(5px);
         }}
 
         .metric-card::before {{
@@ -356,7 +366,7 @@ def _theme_css() -> str:
             left: 0;
             right: 0;
             top: 0;
-            height: 4px;
+            height: 3px;
             background: linear-gradient(90deg, var(--green-soft), var(--gold));
         }}
 
@@ -394,7 +404,8 @@ def _theme_css() -> str:
             line-height: 1.08;
         }}
 
-        .insight-copy {{
+        .insight-copy,
+        .note-copy {{
             color: var(--muted);
             font-size: 0.95rem;
             line-height: 1.64;
@@ -407,13 +418,6 @@ def _theme_css() -> str:
             font-size: 1.35rem;
             font-weight: 800;
             line-height: 1.08;
-        }}
-
-        .note-copy {{
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.62;
-            margin-top: 0.5rem;
         }}
 
         .bullet-list {{
@@ -451,17 +455,27 @@ def _theme_css() -> str:
         }}
 
         div[data-testid="stPlotlyChart"] {{
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.015);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 24px;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow), var(--glass-highlight);
             padding: 0.35rem;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(4px);
         }}
 
         @media (max-width: 1100px) {{
             .hero-stats {{
                 grid-template-columns: 1fr;
+            }}
+        }}
+
+        @media (min-width: 1200px) {{
+            .block-container {{
+                padding-top: 3.4rem;
+            }}
+
+            .hero-shell {{
+                margin-top: 0.7rem;
             }}
         }}
     </style>
@@ -508,7 +522,6 @@ def hero_panel(
     stats: list[dict[str, str]],
     note_title: str,
     note_copy: str,
-    image_path: Path | None = PRODUCT_IMAGE,
 ) -> None:
     badge_html = "".join(f'<span class="badge-pill">{badge}</span>' for badge in badges)
     stats_html = "".join(

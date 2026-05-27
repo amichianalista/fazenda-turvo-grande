@@ -1,8 +1,7 @@
 # Automacao Pecuaria
 
-App em Streamlit para apresentar a operacao da Fazenda Turvo Grande com leitura
-executiva, contexto de mercado e prontidao financeira para o negocio de Queijo
-Minas Artesanal.
+App em Streamlit para apresentar a Fazenda Turvo Grande com leitura visual,
+executiva e simples de entender para o produtor rural.
 
 ## Estado atual
 
@@ -12,11 +11,39 @@ Neste momento, a base nova contem:
 
 - `Pagina 1 | Visao Atual do Negocio`
 - leitura direta da planilha `.ods`
-- tema visual novo com background dedicado
+- tema visual novo com destaque forte para o `background.png`
 - cards, KPIs e graficos com copy voltada ao produtor rural
+- navegação simplificada para a primeira entrega
 
 As paginas antigas foram removidas do fluxo atual e a reconstrucao esta sendo feita
 por etapas, comecando pela primeira pagina.
+
+## O que a Pagina 1 entrega hoje
+
+A primeira pagina foi pensada como um retrato rapido do negocio, sem entrar ainda
+na parte de custos.
+
+Ela mostra:
+
+- hero principal com visual central e copy simples
+- KPIs de producao, escala fisica, preco e canal atual
+- cards de leitura pratica do momento da fazenda
+- grafico de ritmo da producao
+- grafico de concentracao do canal de venda
+
+Hoje a pagina 1 esta focada em:
+
+- operacao atual
+- receita bruta atual
+- dependencia da cooperativa
+- potencial de valorizacao do produto
+
+Ela nao cobre neste momento:
+
+- custos detalhados
+- lucro liquido
+- margem
+- paginas 2, 3 e 4 reconstruidas
 
 ## Fonte de dados
 
@@ -49,3 +76,9 @@ Nao usamos CSV intermediario.
 - `app_core/components.py`: tema e componentes visuais
 - `assets/`: imagens e materiais visuais
 - `Referenciais Iniciais/levantamento_pagina1_visao_atual_negocio.md`: levantamento da base para a nova pagina 1
+
+## Proximos passos
+
+- reconstruir a `Pagina 2` com base em pesquisas academicas
+- definir a nova abordagem para expansao, mercado e custos nas proximas paginas
+- manter o visual valorizando o background e a identidade do projeto
