@@ -207,6 +207,101 @@ def commercial_metrics() -> dict[str, float | str | None]:
     }
 
 
+def _clean_cost_label(value: str) -> str:
+    cleaned = _normalize_label(value)
+    cleaned = re.sub(r"^[^\wÀ-ÿ]+", "", cleaned).strip()
+    return cleaned
+
+
+@lru_cache(maxsize=1)
+def cost_entries() -> list[dict[str, str | bool | None]]:
+    rows = _rows("2. O que a gente gasta")
+    current_group = ""
+    items: list[dict[str, str | bool | None]] = []
+
+    for row in rows:
+        label = _normalize_label(row[0]) if row else ""
+        if "CUSTOS QUE JÁ SABEMOS" in label or "CUSTOS QUE JÃ" in label:
+            current_group = "known"
+            continue
+        if "CUSTOS A DESCOBRIR" in label:
+            current_group = "discover"
+            continue
+        if "RESUMO DOS CUSTOS" in label:
+            current_group = ""
+            continue
+
+        if len(row) < 5 or not current_group:
+            continue
+
+        name = row[1] if len(row) > 1 else ""
+        if not name or _normalize_label(name) == "Custo":
+            continue
+
+        value_text = _normalize_label(row[2]) if len(row) > 2 else ""
+        method_text = _normalize_label(row[3]) if len(row) > 3 else ""
+        status_text = _normalize_label(row[4]) if len(row) > 4 else ""
+        note_text = _normalize_label(row[6]) if len(row) > 6 else ""
+
+        items.append(
+            {
+                "group": current_group,
+                "category": _clean_cost_label(name),
+                "value_text": value_text or "Nao preenchido",
+                "method_text": method_text or "Sem orientacao",
+                "status_text": status_text or "Sem status",
+                "note_text": note_text or "",
+                "has_value": bool(value_text),
+            }
+        )
+
+    return items
+
+
+def known_costs() -> list[dict[str, str | bool | None]]:
+    return [item for item in cost_entries() if item["group"] == "known"]
+
+
+def discover_costs() -> list[dict[str, str | bool | None]]:
+    return [item for item in cost_entries() if item["group"] == "discover"]
+
+
+def cost_metrics() -> dict[str, int]:
+    known = known_costs()
+    discover = discover_costs()
+    filled = sum(1 for item in cost_entries() if item["has_value"])
+
+    return {
+        "known_count": len(known),
+        "discover_count": len(discover),
+        "filled_count": filled,
+        "pending_count": len(cost_entries()) - filled,
+        "total_count": len(cost_entries()),
+    }
+
+
+def cost_summary() -> dict[str, str]:
+    rows = _rows("2. O que a gente gasta")
+    summary: dict[str, str] = {}
+
+    for row in rows:
+        if len(row) >= 3 and row[1]:
+            label = _normalize_label(row[1])
+            value = _normalize_label(row[2])
+            if "Custos que já sabemos" in label or "Custos que jÃ¡ sabemos" in label:
+                summary["known"] = value
+            elif "Custos a descobrir" in label:
+                summary["discover"] = value
+            elif "CUSTO TOTAL ATUAL" in label:
+                summary["current"] = value
+
+    return {
+        "known_total_text": summary.get("known", "R$ 0,00"),
+        "discover_total_text": summary.get("discover", "R$ 0,00"),
+        "current_total_text": summary.get("current", "R$ 0,00"),
+    }
+
+
 def overview_metrics() -> dict[str, str]:
     production = production_metrics()
     commercial = commercial_metrics()

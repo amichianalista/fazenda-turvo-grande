@@ -30,9 +30,9 @@ THEME_CSS = """
 
     .stApp {
         background:
-            linear-gradient(180deg, rgba(6, 18, 11, 0.84) 0%, rgba(8, 20, 13, 0.78) 100%),
-            radial-gradient(circle at top right, rgba(200, 141, 45, 0.16), transparent 24%),
-            radial-gradient(circle at left 12%, rgba(31, 92, 63, 0.22), transparent 26%),
+            linear-gradient(180deg, rgba(6, 18, 11, 0.48) 0%, rgba(8, 20, 13, 0.40) 100%),
+            radial-gradient(circle at top right, rgba(200, 141, 45, 0.20), transparent 24%),
+            radial-gradient(circle at left 12%, rgba(31, 92, 63, 0.18), transparent 26%),
             var(--app-bg-image);
         background-attachment: fixed;
         background-position: center center;
@@ -58,7 +58,8 @@ THEME_CSS = """
 
     .hero-shell {
         background:
-            linear-gradient(125deg, rgba(12, 34, 24, 0.94), rgba(23, 58, 40, 0.88) 48%, rgba(121, 89, 33, 0.32) 100%);
+            linear-gradient(125deg, rgba(12, 34, 24, 0.68), rgba(23, 58, 40, 0.56) 48%, rgba(121, 89, 33, 0.12) 100%);
+        backdrop-filter: blur(8px);
         border: 1px solid var(--line-strong);
         border-radius: 34px;
         box-shadow: 0 28px 80px rgba(7, 16, 11, 0.28);
@@ -144,11 +145,14 @@ THEME_CSS = """
     }
 
     .kpi-shell {
-        background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(249, 242, 232, 0.82));
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(180deg, rgba(255, 251, 246, 0.62), rgba(249, 242, 232, 0.42));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 24px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 14px 34px rgba(8, 18, 12, 0.10);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         min-height: 164px;
         overflow: hidden;
         padding: 1.28rem 1.2rem 1.12rem 1.2rem;
@@ -181,6 +185,18 @@ THEME_CSS = """
         letter-spacing: -0.03em;
         line-height: 0.98;
         margin: 0.72rem 0 0.42rem 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .kpi-value-compact {
+        font-size: clamp(1.7rem, 2vw, 2.05rem);
+    }
+
+    .kpi-value-tight {
+        font-size: clamp(1.42rem, 1.7vw, 1.72rem);
+        line-height: 1.04;
     }
 
     .kpi-delta {
@@ -191,10 +207,11 @@ THEME_CSS = """
     }
 
     .panel-shell {
-        background: linear-gradient(180deg, rgba(255, 250, 243, 0.88), rgba(249, 243, 235, 0.80));
-        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255, 250, 243, 0.68), rgba(249, 243, 235, 0.48));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 24px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 14px 34px rgba(8, 18, 12, 0.10);
         margin-bottom: 1rem;
         padding: 1.3rem;
     }
@@ -247,10 +264,11 @@ THEME_CSS = """
     }
 
     .bullet-item {
-        background: rgba(255, 250, 243, 0.88);
-        border: 1px solid var(--line);
+        background: rgba(255, 250, 243, 0.62);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 18px;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 14px 34px rgba(8, 18, 12, 0.10);
         color: var(--text);
         font-size: 0.95rem;
         font-weight: 600;
@@ -307,11 +325,18 @@ def section_header(title: str, copy: str) -> None:
 
 
 def kpi_card(label: str, value: str, delta: str) -> None:
+    value_length = len(value)
+    value_class = "kpi-value"
+    if value_length > 10:
+        value_class += " kpi-value-compact"
+    if value_length > 16:
+        value_class += " kpi-value-tight"
+
     st.markdown(
         f"""
         <div class="kpi-shell">
             <div class="kpi-label">{label}</div>
-            <div class="kpi-value">{value}</div>
+            <div class="{value_class}">{value}</div>
             <div class="kpi-delta">{delta}</div>
         </div>
         """,

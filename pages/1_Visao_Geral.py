@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from html import escape
+
 import streamlit as st
 
 from app_core.components import apply_theme, kpi_card, section_header
@@ -15,6 +17,18 @@ fmt = formatting_helpers()
 identity = identity_context()
 production = production_metrics()
 commercial = commercial_metrics()
+
+
+def two_up_cards(left_card: str, right_card: str) -> None:
+    st.markdown(
+        f"""
+        <div class="paired-section">
+            {left_card}
+            {right_card}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown(
     """
@@ -44,7 +58,8 @@ st.markdown(
         }
 
         .hero-rail {
-            background: linear-gradient(180deg, rgba(255, 248, 239, 0.10), rgba(255, 248, 239, 0.05));
+            background: linear-gradient(180deg, rgba(255, 248, 239, 0.08), rgba(255, 248, 239, 0.03));
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 26px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -75,8 +90,8 @@ st.markdown(
         }
 
         .hero-rail-card {
-            background: linear-gradient(180deg, rgba(255, 248, 239, 0.10), rgba(255, 248, 239, 0.04));
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(180deg, rgba(255, 248, 239, 0.08), rgba(255, 248, 239, 0.03));
+            border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 22px;
             padding: 1rem 1rem 1.05rem 1rem;
         }
@@ -106,30 +121,12 @@ st.markdown(
             margin-top: 0.45rem;
         }
 
-        .section-ribbon {
-            align-items: center;
-            display: flex;
-            gap: 0.8rem;
-            margin-bottom: 0.95rem;
-        }
-
-        .section-index {
-            background: rgba(217, 192, 125, 0.16);
-            border: 1px solid rgba(217, 192, 125, 0.22);
-            border-radius: 999px;
-            color: #f0dca9;
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            padding: 0.42rem 0.78rem;
-            text-transform: uppercase;
-        }
-
         .editorial-card {
-            background: linear-gradient(180deg, rgba(255, 250, 243, 0.90), rgba(248, 241, 232, 0.80));
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(180deg, rgba(255, 250, 243, 0.64), rgba(248, 241, 232, 0.42));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 30px;
-            box-shadow: 0 22px 56px rgba(8, 20, 13, 0.14);
+            box-shadow: 0 16px 40px rgba(8, 20, 13, 0.12);
             min-height: 100%;
             overflow: hidden;
             padding: 1.5rem;
@@ -137,9 +134,10 @@ st.markdown(
         }
 
         .editorial-card.dark {
-            background: linear-gradient(145deg, rgba(18, 49, 34, 0.96), rgba(33, 79, 54, 0.92));
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            box-shadow: 0 24px 64px rgba(7, 16, 11, 0.24);
+            background: linear-gradient(145deg, rgba(18, 49, 34, 0.62), rgba(33, 79, 54, 0.54));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 18px 44px rgba(7, 16, 11, 0.18);
         }
 
         .editorial-card.glow::after {
@@ -238,6 +236,7 @@ st.markdown(
         }
 
         .signal-grid {
+            align-items: stretch;
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
@@ -245,6 +244,7 @@ st.markdown(
             background: rgba(255, 248, 239, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 22px;
+            min-height: 100%;
             padding: 0.95rem;
         }
 
@@ -270,15 +270,17 @@ st.markdown(
             align-items: stretch;
             display: grid;
             gap: 0.95rem;
+            grid-auto-rows: 1fr;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             margin-top: 1rem;
         }
 
         .signal-panel {
-            background: linear-gradient(180deg, rgba(255, 250, 243, 0.88), rgba(248, 241, 232, 0.76));
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(180deg, rgba(255, 250, 243, 0.62), rgba(248, 241, 232, 0.42));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 24px;
-            box-shadow: 0 16px 42px rgba(8, 20, 13, 0.12);
+            box-shadow: 0 14px 32px rgba(8, 20, 13, 0.10);
             padding: 1.15rem;
         }
 
@@ -293,11 +295,12 @@ st.markdown(
         .signal-panel-value {
             color: #172218;
             font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-            font-size: 1.72rem;
+            font-size: clamp(1.52rem, 1.8vw, 1.72rem);
             font-weight: 800;
             letter-spacing: -0.03em;
             line-height: 0.98;
             margin-top: 0.55rem;
+            overflow-wrap: anywhere;
         }
 
         .signal-panel-copy {
@@ -307,9 +310,17 @@ st.markdown(
             margin-top: 0.38rem;
         }
 
+        .paired-section {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            margin-top: 1rem;
+        }
+
         @media (max-width: 1100px) {
             .hero-grid,
-            .signal-strip {
+            .signal-strip,
+            .paired-section {
                 grid-template-columns: 1fr;
             }
 
@@ -370,68 +381,57 @@ section_header(
     "Primeiro, vamos situar bem a fazenda e o tipo de producao que ela toca hoje.",
 )
 
-st.markdown('<div class="section-ribbon"><div class="section-index">Bloco 1</div></div>', unsafe_allow_html=True)
-
-identity_cols = st.columns([1.12, 0.88])
-with identity_cols[0]:
-    st.markdown(
-        f"""
-        <div class="editorial-card glow">
-            <div class="editorial-kicker">Quem e a fazenda</div>
-            <div class="editorial-title">{identity["operation_name"]}</div>
-            <div class="editorial-copy">
-                Pelo que esta na planilha, a fazenda trabalha com queijo minas artesanal
-                e hoje vende tudo pela cooperativa.
+two_up_cards(
+    f"""
+    <div class="editorial-card glow">
+        <div class="editorial-kicker">Quem e a fazenda</div>
+        <div class="editorial-title">{escape(identity["operation_name"])}</div>
+        <div class="editorial-copy">
+            Pelo que esta na planilha, a fazenda trabalha com queijo minas artesanal
+            e hoje vende tudo pela cooperativa.
+        </div>
+        <div class="identity-stack">
+            <div class="identity-item">
+                <div class="item-label">Produto</div>
+                <div class="item-value">{escape(identity["product_name"])}</div>
             </div>
-            <div class="identity-stack">
-                <div class="identity-item">
-                    <div class="item-label">Produto</div>
-                    <div class="item-value">{identity["product_name"]}</div>
-                </div>
-                <div class="identity-item">
-                    <div class="item-label">Local</div>
-                    <div class="item-value">{identity["location"]}</div>
-                </div>
-                <div class="identity-item">
-                    <div class="item-label">Base usada</div>
-                    <div class="item-value">Planilha de gestao preenchida pela propria fazenda</div>
-                </div>
+            <div class="identity-item">
+                <div class="item-label">Local</div>
+                <div class="item-value">{escape(identity["location"])}</div>
+            </div>
+            <div class="identity-item">
+                <div class="item-label">Base usada</div>
+                <div class="item-value">Planilha de gestao preenchida pela propria fazenda</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with identity_cols[1]:
-    st.markdown(
-        f"""
-        <div class="editorial-card dark glow">
-            <div class="editorial-kicker">Jeito da operacao</div>
-            <div class="editorial-title">Producao artesanal, tocada com rotina e venda bem definida.</div>
-            <div class="editorial-copy">
-                Antes de falar de conta e grafico, faz mais sentido mostrar com clareza
-                o que a fazenda produz e para onde esse queijo vai.
+    </div>
+    """,
+    """
+    <div class="editorial-card dark glow">
+        <div class="editorial-kicker">Jeito da operacao</div>
+        <div class="editorial-title">Producao artesanal, tocada com rotina e venda bem definida.</div>
+        <div class="editorial-copy">
+            Antes de falar de conta e grafico, faz mais sentido mostrar com clareza
+            o que a fazenda produz e para onde esse queijo vai.
+        </div>
+        <div class="signal-grid">
+            <div class="signal-tile">
+                <div class="signal-tile-label">Produto</div>
+                <div class="signal-tile-value">Artesanal</div>
             </div>
-            <div class="signal-grid">
-                <div class="signal-tile">
-                    <div class="signal-tile-label">Produto</div>
-                    <div class="signal-tile-value">Artesanal</div>
-                </div>
-                <div class="signal-tile">
-                    <div class="signal-tile-label">Destino</div>
-                    <div class="signal-tile-value">Cooperativa</div>
-                </div>
+            <div class="signal-tile">
+                <div class="signal-tile-label">Destino</div>
+                <div class="signal-tile-value">Cooperativa</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+)
 
 section_header(
     "Producao",
     "Aqui ficam os numeros da lida do dia a dia: quantos dias produz, quanto sai e quanto isso vira no mes.",
 )
-
-st.markdown('<div class="section-ribbon"><div class="section-index">Bloco 2</div></div>', unsafe_allow_html=True)
 
 production_cols = st.columns(4)
 with production_cols[0]:
@@ -466,62 +466,53 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-production_detail_cols = st.columns([0.92, 1.08])
-with production_detail_cols[0]:
-    st.markdown(
-        f"""
-        <div class="editorial-card dark">
-            <div class="editorial-kicker">Ritmo da producao</div>
-            <div class="editorial-title">A fazenda ja mostra uma rotina bem clara de producao.</div>
-            <div class="editorial-copy">
-                So com esses dados ja da para entender bem a lida:
-                quantos dias trabalha, quanto sai por dia e o tamanho dessa producao no mes.
+two_up_cards(
+    f"""
+    <div class="editorial-card dark">
+        <div class="editorial-kicker">Ritmo da producao</div>
+        <div class="editorial-title">A fazenda ja mostra uma rotina bem clara de producao.</div>
+        <div class="editorial-copy">
+            So com esses dados ja da para entender bem a lida:
+            quantos dias trabalha, quanto sai por dia e o tamanho dessa producao no mes.
+        </div>
+        <div class="detail-list">
+            <div class="detail-item">
+                <div class="item-label">Dias de producao</div>
+                <div class="item-value">{escape(production["dias_semana_text"] or "Nao mapeado")}</div>
             </div>
-            <div class="detail-list">
-                <div class="detail-item">
-                    <div class="item-label">Dias de producao</div>
-                    <div class="item-value">{production["dias_semana_text"] or "Nao mapeado"}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="item-label">Peso por unidade</div>
-                    <div class="item-value">{production["peso_medio_kg_text"] or "Nao mapeado"}</div>
-                </div>
+            <div class="detail-item">
+                <div class="item-label">Peso por unidade</div>
+                <div class="item-value">{escape(production["peso_medio_kg_text"] or "Nao mapeado")}</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with production_detail_cols[1]:
-    st.markdown(
-        f"""
-        <div class="editorial-card glow">
-            <div class="editorial-kicker">Fechamento do mes</div>
-            <div class="editorial-title">{fmt["number"](production["queijos_mes"], suffix=" queijos por mes")}</div>
-            <div class="editorial-copy">
-                Esse numero junta a conta toda e mostra de forma simples
-                quanto a fazenda produz no mes.
+    </div>
+    """,
+    f"""
+    <div class="editorial-card glow">
+        <div class="editorial-kicker">Fechamento do mes</div>
+        <div class="editorial-title">{fmt["number"](production["queijos_mes"], suffix=" queijos por mes")}</div>
+        <div class="editorial-copy">
+            Esse numero junta a conta toda e mostra de forma simples
+            quanto a fazenda produz no mes.
+        </div>
+        <div class="identity-stack">
+            <div class="identity-item">
+                <div class="item-label">Queijos por semana</div>
+                <div class="item-value">{escape(production["queijos_semana_text"] or "Nao mapeado")}</div>
             </div>
-            <div class="identity-stack">
-                <div class="identity-item">
-                    <div class="item-label">Queijos por semana</div>
-                    <div class="item-value">{production["queijos_semana_text"] or "Nao mapeado"}</div>
-                </div>
-                <div class="identity-item">
-                    <div class="item-label">Volume mensal</div>
-                    <div class="item-value">{production["kg_mes_text"] or "Nao mapeado"}</div>
-                </div>
+            <div class="identity-item">
+                <div class="item-label">Volume mensal</div>
+                <div class="item-value">{escape(production["kg_mes_text"] or "Nao mapeado")}</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+)
 
 section_header(
     "Comercial",
     "Por fim, aqui fica a parte da venda: quanto estao pagando e quanto isso rende no mes.",
 )
-
-st.markdown('<div class="section-ribbon"><div class="section-index">Bloco 3</div></div>', unsafe_allow_html=True)
 
 commercial_cols = st.columns(4)
 with commercial_cols[0]:
@@ -533,52 +524,45 @@ with commercial_cols[2]:
 with commercial_cols[3]:
     kpi_card("Venda para cooperativa", fmt["percent"](commercial["pct_cooperativa"]), "Participacao")
 
-commercial_detail_cols = st.columns([1.05, 0.95])
-with commercial_detail_cols[0]:
-    st.markdown(
-        f"""
-        <div class="editorial-card glow">
-            <div class="editorial-kicker">Dinheiro da venda</div>
-            <div class="editorial-title">{fmt["currency"](commercial["receita_bruta"])}</div>
-            <div class="editorial-copy">
-                Aqui fica mais facil enxergar o valor bruto que entra no mes,
-                junto com o preco pago no quilo do queijo.
+two_up_cards(
+    f"""
+    <div class="editorial-card glow">
+        <div class="editorial-kicker">Dinheiro da venda</div>
+        <div class="editorial-title">{fmt["currency"](commercial["receita_bruta"])}</div>
+        <div class="editorial-copy">
+            Aqui fica mais facil enxergar o valor bruto que entra no mes,
+            junto com o preco pago no quilo do queijo.
+        </div>
+        <div class="identity-stack">
+            <div class="identity-item">
+                <div class="item-label">Preco pago</div>
+                <div class="item-value">{escape(commercial["preco_kg_text"] or "Nao mapeado")}</div>
             </div>
-            <div class="identity-stack">
-                <div class="identity-item">
-                    <div class="item-label">Preco pago</div>
-                    <div class="item-value">{commercial["preco_kg_text"] or "Nao mapeado"}</div>
-                </div>
-                <div class="identity-item">
-                    <div class="item-label">Para onde vai</div>
-                    <div class="item-value">{commercial["pct_cooperativa_text"] or "Nao mapeado"}</div>
-                </div>
+            <div class="identity-item">
+                <div class="item-label">Para onde vai</div>
+                <div class="item-value">{escape(commercial["pct_cooperativa_text"] or "Nao mapeado")}</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with commercial_detail_cols[1]:
-    st.markdown(
-        f"""
-        <div class="editorial-card dark glow">
-            <div class="editorial-kicker">Jeito de vender</div>
-            <div class="editorial-title">Hoje a venda toda vai para a cooperativa.</div>
-            <div class="editorial-copy">
-                Isso ajuda a entender rapido como a fazenda vende a producao
-                e de onde sai esse valor mostrado acima.
+    </div>
+    """,
+    f"""
+    <div class="editorial-card dark glow">
+        <div class="editorial-kicker">Jeito de vender</div>
+        <div class="editorial-title">Hoje a venda toda vai para a cooperativa.</div>
+        <div class="editorial-copy">
+            Isso ajuda a entender rapido como a fazenda vende a producao
+            e de onde sai esse valor mostrado acima.
+        </div>
+        <div class="detail-list">
+            <div class="detail-item">
+                <div class="item-label">Canal principal</div>
+                <div class="item-value">{escape(commercial["canal"])}</div>
             </div>
-            <div class="detail-list">
-                <div class="detail-item">
-                    <div class="item-label">Canal principal</div>
-                    <div class="item-value">{commercial["canal"]}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="item-label">Valor anotado</div>
-                    <div class="item-value">{commercial["receita_bruta_text"] or "Nao mapeado"}</div>
-                </div>
+            <div class="detail-item">
+                <div class="item-label">Valor anotado</div>
+                <div class="item-value">{escape(commercial["receita_bruta_text"] or "Nao mapeado")}</div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+)
