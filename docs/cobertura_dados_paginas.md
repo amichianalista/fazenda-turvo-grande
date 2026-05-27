@@ -1,4 +1,4 @@
-# Cobertura de dados da pagina atual
+# Cobertura de dados das paginas
 
 Fonte oficial analisada:
 
@@ -6,11 +6,19 @@ Fonte oficial analisada:
 
 ## Resumo
 
-Hoje a base sustenta bem uma pagina inicial com:
+Hoje a base sustenta bem:
 
 - identidade da fazenda
 - dados de producao
 - dados de venda
+- leitura de prontidao dos custos
+
+O estudo em PDF sustenta bem:
+
+- contexto de mercado
+- posicionamento premium
+- sazonalidade estimada
+- oportunidades e riscos estrategicos
 
 Ainda nao sustenta, com seguranca:
 
@@ -62,5 +70,6 @@ Ainda nao sustenta, com seguranca:
 
 ## Conclusao
 
-A pagina `1_Visao_Geral` pode ser sustentada com seguranca pelos dados atuais.
-As proximas telas dependem de completar principalmente a parte de custos.
+A pagina `1_Visao_Executiva` e a pagina `2_Operacao_e_Producao` podem ser sustentadas com seguranca pelos dados atuais da planilha.
+A pagina `3_Mercado_e_Expansao` depende do estudo estrategico em PDF.
+A pagina `4_Custos_e_Prontidao` pode mostrar maturidade da base, mas ainda nao deve prometer margem ou lucro ate completar os custos.

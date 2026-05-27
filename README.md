@@ -1,27 +1,37 @@
 # Automacao Pecuaria
 
-App em Streamlit para apresentar, de forma visual e simples, os dados atuais da
-Fazenda Turvo Grande sobre producao e venda de Queijo Minas Artesanal.
+App em Streamlit para apresentar a operacao da Fazenda Turvo Grande com leitura
+executiva, contexto de mercado e prontidao financeira para o negocio de Queijo
+Minas Artesanal.
 
 ## Estado atual
 
-Hoje o projeto tem uma unica tela:
+Hoje o projeto esta organizado em quatro paginas:
 
-- `Pagina 1 | Visao Geral`
+- `Pagina 1 | Visao Executiva`
+- `Pagina 2 | Operacao e Producao`
+- `Pagina 3 | Mercado e Expansao`
+- `Pagina 4 | Custos e Prontidao`
 
-Essa pagina mostra tres blocos principais:
+Cada pagina responde a uma frente de decisao diferente:
 
-- identidade e contexto da fazenda
-- producao
-- comercial
+- panorama do negocio
+- cadencia operacional e escala
+- posicionamento, mercado e oportunidades
+- maturidade da base de custos
 
 ## Fonte de dados
 
-A leitura sai direto da planilha original:
+A leitura operacional sai direto da planilha original:
 
 - `Referenciais Iniciais/planilha de gestao.ods`
 
-Nao usamos mais CSV intermediario.
+O contexto estrategico e visual usa tambem:
+
+- `Referenciais Iniciais/queijo_turvo_grande.pdf`
+- `assets/queijopremiado.png`
+
+Nao usamos CSV intermediario.
 
 ## Como rodar
 
@@ -35,7 +45,10 @@ Nao usamos mais CSV intermediario.
 ## Estrutura principal
 
 - `app.py`: redireciona direto para a pagina principal
-- `pages/1_Visao_Geral.py`: tela atual do projeto
+- `pages/1_Visao_Executiva.py`: panorama geral do negocio
+- `pages/2_Operacao_e_Producao.py`: leitura operacional e escala
+- `pages/3_Mercado_e_Expansao.py`: contexto de mercado, concorrencia e expansao
+- `pages/4_Custos_e_Prontidao.py`: maturidade dos custos e proximos levantamentos
 - `app_core/data.py`: leitura da planilha `.ods`
 - `app_core/components.py`: tema e componentes visuais
 - `assets/`: imagens e materiais visuais

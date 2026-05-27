@@ -3,4 +3,4 @@ from __future__ import annotations
 import streamlit as st
 
 
-st.switch_page("pages/1_Visao_Geral.py")
+st.switch_page("pages/1_Visao_Executiva.py")
