@@ -363,8 +363,8 @@ def producer_messages() -> list[dict[str, str]]:
             "copy": "A cooperativa resolve a saida, mas deixa a fazenda dependente de um unico caminho.",
         },
         {
-            "title": "O lucro real ainda nao esta fechado",
-            "copy": "Enquanto varios custos seguem sem valor mensal, o numero final fica incompleto.",
+            "title": "O produto ja tem base para ganhar mais valor",
+            "copy": "Com origem forte e ritmo constante, o proximo salto pode vir mais do canal do que do volume.",
         },
     ]
 

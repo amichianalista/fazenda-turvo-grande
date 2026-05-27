@@ -31,18 +31,18 @@ def _theme_css() -> str:
     return f"""
     <style>
         :root {{
-            --paper: rgba(247, 242, 231, 0.96);
-            --paper-strong: rgba(255, 251, 243, 0.98);
-            --paper-soft: rgba(237, 229, 212, 0.94);
-            --ink: #132016;
-            --muted: #5e6b60;
-            --line: rgba(19, 32, 22, 0.10);
+            --paper: rgba(10, 24, 14, 0.18);
+            --paper-strong: rgba(255, 251, 243, 0.10);
+            --paper-soft: rgba(255, 251, 243, 0.08);
+            --ink: #fff7ea;
+            --muted: rgba(255, 247, 234, 0.74);
+            --line: rgba(255, 255, 255, 0.12);
             --gold: #c79a47;
             --gold-soft: #e0bc79;
             --green: #214a2d;
             --green-soft: #3f7851;
             --danger: #8c5536;
-            --shadow: 0 22px 44px rgba(7, 17, 10, 0.20);
+            --shadow: 0 18px 34px rgba(7, 17, 10, 0.14);
             --display-font: "Georgia", "Palatino Linotype", serif;
             --body-font: "Trebuchet MS", "Segoe UI", sans-serif;
         }}
@@ -144,14 +144,15 @@ def _theme_css() -> str:
         }}
 
         .hero-shell {{
-            background: linear-gradient(145deg, rgba(13, 31, 19, 0.95), rgba(26, 57, 34, 0.93));
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(145deg, rgba(9, 23, 13, 0.28), rgba(22, 48, 29, 0.18));
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 34px;
-            box-shadow: 0 30px 60px rgba(7, 17, 10, 0.26);
+            box-shadow: 0 24px 48px rgba(7, 17, 10, 0.16);
             padding: 2rem;
             overflow: hidden;
             position: relative;
             margin-bottom: 1.2rem;
+            backdrop-filter: blur(8px);
         }}
 
         .hero-shell::after {{
@@ -166,10 +167,11 @@ def _theme_css() -> str:
 
         .hero-grid {{
             display: grid;
-            grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
-            gap: 1.3rem;
+            gap: 1.2rem;
+            justify-items: center;
             position: relative;
             z-index: 1;
+            text-align: center;
         }}
 
         .hero-kicker {{
@@ -187,8 +189,18 @@ def _theme_css() -> str:
             font-weight: 800;
             line-height: 0.95;
             letter-spacing: -0.03em;
-            margin-top: 0.7rem;
-            max-width: 760px;
+            margin-top: 0;
+            max-width: 920px;
+        }}
+
+        .hero-title-card {{
+            background: linear-gradient(180deg, rgba(8, 21, 12, 0.42), rgba(8, 21, 12, 0.24));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(7, 17, 10, 0.16);
+            padding: 1.25rem 1.4rem 1.35rem 1.4rem;
+            width: min(100%, 980px);
+            backdrop-filter: blur(10px);
         }}
 
         .hero-copy {{
@@ -196,7 +208,7 @@ def _theme_css() -> str:
             font-size: 1rem;
             line-height: 1.72;
             margin-top: 0.9rem;
-            max-width: 760px;
+            max-width: 860px;
         }}
 
         .badge-row {{
@@ -204,6 +216,7 @@ def _theme_css() -> str:
             flex-wrap: wrap;
             gap: 0.55rem;
             margin-top: 1rem;
+            justify-content: center;
         }}
 
         .badge-pill {{
@@ -221,13 +234,15 @@ def _theme_css() -> str:
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.9rem;
             margin-top: 1.2rem;
+            width: min(100%, 980px);
         }}
 
         .hero-stat {{
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 20px;
             padding: 0.9rem;
+            backdrop-filter: blur(10px);
         }}
 
         .hero-stat-label {{
@@ -257,22 +272,15 @@ def _theme_css() -> str:
         .hero-aside {{
             display: grid;
             gap: 0.9rem;
+            align-content: start;
+            width: min(100%, 780px);
         }}
 
-        .hero-image-card,
         .hero-note-card {{
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 24px;
-            overflow: hidden;
-        }}
-
-        .hero-image-card img {{
-            width: 100%;
-            height: 100%;
-            max-height: 330px;
-            object-fit: cover;
-            display: block;
+            backdrop-filter: blur(10px);
         }}
 
         .hero-note-card {{
@@ -329,12 +337,12 @@ def _theme_css() -> str:
         .insight-card,
         .note-card {{
             background: var(--paper);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
             box-shadow: var(--shadow);
             padding: 1.15rem;
             height: 100%;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
         }}
 
         .metric-card {{
@@ -371,7 +379,7 @@ def _theme_css() -> str:
         }}
 
         .metric-note {{
-            color: var(--green-soft);
+            color: rgba(255, 247, 234, 0.78);
             font-size: 0.92rem;
             font-weight: 700;
             line-height: 1.5;
@@ -391,10 +399,6 @@ def _theme_css() -> str:
             font-size: 0.95rem;
             line-height: 1.64;
             margin-top: 0.55rem;
-        }}
-
-        .note-card {{
-            background: rgba(255, 251, 243, 0.94);
         }}
 
         .note-title {{
@@ -447,18 +451,15 @@ def _theme_css() -> str:
         }}
 
         div[data-testid="stPlotlyChart"] {{
-            background: rgba(255, 251, 243, 0.97);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 24px;
             box-shadow: var(--shadow);
             padding: 0.35rem;
+            backdrop-filter: blur(8px);
         }}
 
         @media (max-width: 1100px) {{
-            .hero-grid {{
-                grid-template-columns: 1fr;
-            }}
-
             .hero-stats {{
                 grid-template-columns: 1fr;
             }}
@@ -521,25 +522,20 @@ def hero_panel(
         for item in stats
     )
 
-    image_html = ""
-    if image_path is not None:
-        image_uri = _image_data_uri(str(image_path))
-        if image_uri:
-            image_html = f'<div class="hero-image-card"><img src="{image_uri}" alt="Queijo Turvo Grande"></div>'
-
     st.markdown(
         f"""
         <div class="hero-shell">
             <div class="hero-grid">
                 <div>
                     <div class="hero-kicker">{kicker}</div>
-                    <div class="hero-title">{title}</div>
+                    <div class="hero-title-card">
+                        <div class="hero-title">{title}</div>
+                    </div>
                     <div class="hero-copy">{copy}</div>
                     <div class="badge-row">{badge_html}</div>
                     <div class="hero-stats">{stats_html}</div>
                 </div>
                 <div class="hero-aside">
-                    {image_html}
                     <div class="hero-note-card">
                         <div class="hero-kicker">Leitura do produtor</div>
                         <div class="hero-note-title">{note_title}</div>
@@ -623,12 +619,24 @@ def source_note(copy: str) -> None:
 
 def chart_style(fig: go.Figure) -> go.Figure:
     fig.update_layout(
-        font={"family": "Trebuchet MS, Segoe UI, sans-serif", "color": "#132016"},
+        font={"family": "Trebuchet MS, Segoe UI, sans-serif", "color": "#fff7ea"},
+        title_font={"color": "#fff7ea"},
         paper_bgcolor="rgba(255,251,243,0)",
         plot_bgcolor="rgba(255,251,243,0)",
         margin={"l": 26, "r": 26, "t": 54, "b": 24},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
     )
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="rgba(19,32,22,0.08)")
-    fig.update_yaxes(gridcolor="rgba(19,32,22,0.08)", zeroline=False)
+    fig.update_xaxes(
+        showgrid=False,
+        zeroline=False,
+        linecolor="rgba(255,255,255,0.10)",
+        tickfont={"color": "#fff7ea"},
+        title_font={"color": "#fff7ea"},
+    )
+    fig.update_yaxes(
+        gridcolor="rgba(255,255,255,0.10)",
+        zeroline=False,
+        tickfont={"color": "#fff7ea"},
+        title_font={"color": "#fff7ea"},
+    )
     return fig
