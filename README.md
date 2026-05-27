@@ -6,19 +6,17 @@ Minas Artesanal.
 
 ## Estado atual
 
-Hoje o projeto esta organizado em quatro paginas:
+Hoje o projeto foi reiniciado.
 
-- `Pagina 1 | Visao Executiva`
-- `Pagina 2 | Operacao e Producao`
-- `Pagina 3 | Mercado e Expansao`
-- `Pagina 4 | Custos e Prontidao`
+Neste momento, a base nova contem:
 
-Cada pagina responde a uma frente de decisao diferente:
+- `Pagina 1 | Visao Atual do Negocio`
+- leitura direta da planilha `.ods`
+- tema visual novo com background dedicado
+- cards, KPIs e graficos com copy voltada ao produtor rural
 
-- panorama do negocio
-- cadencia operacional e escala
-- posicionamento, mercado e oportunidades
-- maturidade da base de custos
+As paginas antigas foram removidas do fluxo atual e a reconstrucao esta sendo feita
+por etapas, comecando pela primeira pagina.
 
 ## Fonte de dados
 
@@ -29,6 +27,7 @@ A leitura operacional sai direto da planilha original:
 O contexto estrategico e visual usa tambem:
 
 - `Referenciais Iniciais/queijo_turvo_grande.pdf`
+- `assets/background.png`
 - `assets/queijopremiado.png`
 
 Nao usamos CSV intermediario.
@@ -45,10 +44,8 @@ Nao usamos CSV intermediario.
 ## Estrutura principal
 
 - `app.py`: redireciona direto para a pagina principal
-- `pages/1_Visao_Executiva.py`: panorama geral do negocio
-- `pages/2_Operacao_e_Producao.py`: leitura operacional e escala
-- `pages/3_Mercado_e_Expansao.py`: contexto de mercado, concorrencia e expansao
-- `pages/4_Custos_e_Prontidao.py`: maturidade dos custos e proximos levantamentos
+- `pages/1_Visao_Executiva.py`: primeira pagina reconstruida, com leitura executiva atual
 - `app_core/data.py`: leitura da planilha `.ods`
 - `app_core/components.py`: tema e componentes visuais
 - `assets/`: imagens e materiais visuais
+- `Referenciais Iniciais/levantamento_pagina1_visao_atual_negocio.md`: levantamento da base para a nova pagina 1

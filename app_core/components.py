@@ -7,473 +7,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 import streamlit as st
 
-from app_core.data import PRODUCT_IMAGE
-
-
-THEME_CSS = """
-<style>
-    :root {
-        --bg: #f4f0e8;
-        --surface: #fffdf8;
-        --surface-muted: #f7f1e8;
-        --surface-dark: #123326;
-        --surface-dark-soft: #1a4735;
-        --text: #17231c;
-        --muted: #627063;
-        --line: rgba(23, 35, 28, 0.08);
-        --line-strong: rgba(255, 255, 255, 0.12);
-        --green: #173e2d;
-        --green-soft: #2c6b4b;
-        --amber: #b98433;
-        --sand: #d8c2a4;
-        --danger: #8d4b2f;
-        --shadow: 0 16px 40px rgba(18, 40, 28, 0.08);
-        --display-font: "Palatino Linotype", "Book Antiqua", Palatino, serif;
-        --body-font: "Segoe UI", "Trebuchet MS", sans-serif;
-    }
-
-    .stApp {
-        background:
-            radial-gradient(circle at top left, rgba(214, 191, 151, 0.14), transparent 28%),
-            radial-gradient(circle at top right, rgba(32, 94, 66, 0.06), transparent 24%),
-            linear-gradient(180deg, #f7f3eb 0%, #f3eee5 100%);
-        color: var(--text);
-        font-family: var(--body-font);
-    }
-
-    .block-container {
-        max-width: 1240px;
-        padding-top: 2rem;
-        padding-bottom: 3rem;
-    }
-
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #183b2c 0%, #10271e 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    [data-testid="stSidebar"] * {
-        color: #f6f1e7;
-    }
-
-    [data-testid="stSidebarNavLink"] {
-        border-radius: 14px;
-        margin-bottom: 0.3rem;
-    }
-
-    [data-testid="stSidebarNavLink"][aria-current="page"] {
-        background: rgba(255, 255, 255, 0.10);
-    }
-
-    .sidebar-shell {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px;
-        margin-bottom: 1rem;
-        padding: 1rem 1rem 1.1rem 1rem;
-    }
-
-    .sidebar-kicker {
-        color: #e4c78f;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-    }
-
-    .sidebar-title {
-        color: #fff8ec;
-        font-family: var(--display-font);
-        font-size: 1.3rem;
-        font-weight: 700;
-        line-height: 1.02;
-        margin-top: 0.55rem;
-    }
-
-    .sidebar-copy {
-        color: rgba(255, 248, 236, 0.78);
-        font-size: 0.92rem;
-        line-height: 1.58;
-        margin-top: 0.7rem;
-    }
-
-    .source-note {
-        color: var(--muted);
-        font-size: 0.86rem;
-        line-height: 1.55;
-        margin-top: 0.75rem;
-    }
-
-    .topline {
-        align-items: center;
-        color: var(--muted);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        font-size: 0.84rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-    }
-
-    .topline-dot {
-        color: #9a8f7c;
-    }
-
-    .hero-panel {
-        background:
-            linear-gradient(140deg, rgba(15, 39, 29, 0.98), rgba(23, 62, 45, 0.96)),
-            linear-gradient(90deg, rgba(185, 132, 51, 0.12), transparent 35%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 30px;
-        box-shadow: 0 24px 60px rgba(13, 33, 23, 0.18);
-        margin-bottom: 1.3rem;
-        overflow: hidden;
-        padding: 1.9rem 1.9rem 2rem 1.9rem;
-        position: relative;
-    }
-
-    .hero-panel::after {
-        background: radial-gradient(circle at top right, rgba(230, 193, 125, 0.18), transparent 24%);
-        content: "";
-        inset: 0;
-        pointer-events: none;
-        position: absolute;
-    }
-
-    .hero-grid {
-        display: grid;
-        gap: 1.25rem;
-        grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.95fr);
-        position: relative;
-        z-index: 1;
-    }
-
-    .hero-kicker {
-        color: #e7cb92;
-        font-size: 0.76rem;
-        font-weight: 800;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-    }
-
-    .hero-title {
-        color: #fff9ef;
-        font-family: var(--display-font);
-        font-size: clamp(2.4rem, 4.5vw, 4rem);
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 0.94;
-        margin-top: 0.8rem;
-        max-width: 740px;
-    }
-
-    .hero-copy {
-        color: rgba(255, 249, 239, 0.82);
-        font-size: 1rem;
-        line-height: 1.72;
-        margin-top: 0.9rem;
-        max-width: 720px;
-    }
-
-    .badge-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.55rem;
-        margin-top: 1rem;
-    }
-
-    .badge-pill {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 999px;
-        color: #fff6e8;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 0.46rem 0.72rem;
-    }
-
-    .hero-stats {
-        display: grid;
-        gap: 0.85rem;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        margin-top: 1.3rem;
-    }
-
-    .hero-stat {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 18px;
-        padding: 0.85rem 0.9rem 0.9rem 0.9rem;
-    }
-
-    .hero-stat-label {
-        color: rgba(231, 203, 146, 0.88);
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-    }
-
-    .hero-stat-value {
-        color: #fff9ef;
-        font-family: var(--display-font);
-        font-size: 1.6rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1;
-        margin-top: 0.45rem;
-    }
-
-    .hero-stat-note {
-        color: rgba(255, 249, 239, 0.72);
-        font-size: 0.9rem;
-        line-height: 1.45;
-        margin-top: 0.35rem;
-    }
-
-    .hero-aside {
-        display: grid;
-        gap: 0.9rem;
-        grid-template-rows: auto 1fr;
-    }
-
-    .hero-image-card,
-    .hero-note-card {
-        background: rgba(255, 255, 255, 0.07);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 24px;
-        overflow: hidden;
-    }
-
-    .hero-image-card img {
-        display: block;
-        height: 100%;
-        max-height: 330px;
-        object-fit: cover;
-        width: 100%;
-    }
-
-    .hero-note-card {
-        padding: 1rem 1rem 1.05rem 1rem;
-    }
-
-    .hero-note-label {
-        color: rgba(231, 203, 146, 0.88);
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-    }
-
-    .hero-note-title {
-        color: #fff9ef;
-        font-family: var(--display-font);
-        font-size: 1.22rem;
-        font-weight: 700;
-        line-height: 1.08;
-        margin-top: 0.55rem;
-    }
-
-    .hero-note-copy {
-        color: rgba(255, 249, 239, 0.76);
-        font-size: 0.94rem;
-        line-height: 1.62;
-        margin-top: 0.55rem;
-    }
-
-    .section-shell {
-        margin: 1.6rem 0 0.85rem 0;
-    }
-
-    .section-eyebrow {
-        color: var(--amber);
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-    }
-
-    .section-title {
-        color: var(--text);
-        font-family: var(--display-font);
-        font-size: 2rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1.02;
-        margin-top: 0.45rem;
-    }
-
-    .section-copy {
-        color: var(--muted);
-        font-size: 0.98rem;
-        line-height: 1.72;
-        margin-top: 0.55rem;
-        max-width: 780px;
-    }
-
-    .metric-card,
-    .info-card,
-    .list-card {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        box-shadow: var(--shadow);
-        height: 100%;
-        overflow: hidden;
-        padding: 1.2rem 1.2rem 1.15rem 1.2rem;
-    }
-
-    .metric-card {
-        position: relative;
-    }
-
-    .metric-card::before {
-        background: linear-gradient(90deg, var(--green-soft), var(--amber));
-        content: "";
-        height: 4px;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-
-    .metric-label {
-        color: var(--muted);
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
-
-    .metric-value {
-        color: var(--text);
-        font-family: var(--display-font);
-        font-size: clamp(1.7rem, 2.2vw, 2.3rem);
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1;
-        margin-top: 0.65rem;
-        overflow-wrap: anywhere;
-    }
-
-    .metric-note {
-        color: var(--green-soft);
-        font-size: 0.9rem;
-        font-weight: 700;
-        line-height: 1.5;
-        margin-top: 0.55rem;
-    }
-
-    .info-card.dark {
-        background: linear-gradient(160deg, #153728 0%, #1d4a37 100%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 16px 40px rgba(13, 33, 23, 0.14);
-    }
-
-    .info-kicker {
-        color: var(--muted);
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-    }
-
-    .info-card.dark .info-kicker {
-        color: #e4c78f;
-    }
-
-    .info-title {
-        color: var(--text);
-        font-family: var(--display-font);
-        font-size: 1.45rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1.06;
-        margin-top: 0.6rem;
-    }
-
-    .info-card.dark .info-title {
-        color: #fff8eb;
-    }
-
-    .info-copy {
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.68;
-        margin-top: 0.6rem;
-    }
-
-    .info-card.dark .info-copy {
-        color: rgba(255, 248, 235, 0.78);
-    }
-
-    .list-card-title {
-        color: var(--text);
-        font-family: var(--display-font);
-        font-size: 1.32rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1.08;
-    }
-
-    .list-card-copy {
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.62;
-        margin-top: 0.45rem;
-    }
-
-    .list-rows {
-        display: grid;
-        gap: 0.8rem;
-        margin-top: 0.95rem;
-    }
-
-    .list-row {
-        border-top: 1px solid var(--line);
-        padding-top: 0.8rem;
-    }
-
-    .list-row-label {
-        color: var(--muted);
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
-
-    .list-row-value {
-        color: var(--text);
-        font-size: 1rem;
-        font-weight: 700;
-        line-height: 1.55;
-        margin-top: 0.22rem;
-    }
-
-    .mini-callout {
-        background: var(--surface-muted);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        color: var(--text);
-        font-size: 0.92rem;
-        line-height: 1.58;
-        margin-top: 0.9rem;
-        padding: 0.85rem 0.9rem;
-    }
-
-    @media (max-width: 1100px) {
-        .hero-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .hero-stats {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-"""
+from app_core.data import BACKGROUND_IMAGE, PRODUCT_IMAGE
 
 
 @lru_cache(maxsize=8)
@@ -486,6 +20,453 @@ def _image_data_uri(path: str) -> str:
     return f"data:image/{suffix};base64,{encoded}"
 
 
+def _theme_css() -> str:
+    background_uri = _image_data_uri(str(BACKGROUND_IMAGE))
+    background_rule = (
+        f'background-image: linear-gradient(rgba(8, 20, 12, 0.78), rgba(8, 20, 12, 0.82)), url("{background_uri}");'
+        if background_uri
+        else "background: linear-gradient(180deg, #102515 0%, #1b3d24 100%);"
+    )
+
+    return f"""
+    <style>
+        :root {{
+            --paper: rgba(247, 242, 231, 0.96);
+            --paper-strong: rgba(255, 251, 243, 0.98);
+            --paper-soft: rgba(237, 229, 212, 0.94);
+            --ink: #132016;
+            --muted: #5e6b60;
+            --line: rgba(19, 32, 22, 0.10);
+            --gold: #c79a47;
+            --gold-soft: #e0bc79;
+            --green: #214a2d;
+            --green-soft: #3f7851;
+            --danger: #8c5536;
+            --shadow: 0 22px 44px rgba(7, 17, 10, 0.20);
+            --display-font: "Georgia", "Palatino Linotype", serif;
+            --body-font: "Trebuchet MS", "Segoe UI", sans-serif;
+        }}
+
+        .stApp {{
+            {background_rule}
+            background-attachment: fixed;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--ink);
+            font-family: var(--body-font);
+        }}
+
+        .stApp::before {{
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(221, 184, 110, 0.12), transparent 28%),
+                radial-gradient(circle at 82% 20%, rgba(98, 151, 95, 0.10), transparent 20%);
+            pointer-events: none;
+            z-index: 0;
+        }}
+
+        .block-container {{
+            max-width: 1280px;
+            padding-top: 1.6rem;
+            padding-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }}
+
+        [data-testid="stSidebar"] {{
+            background: linear-gradient(180deg, rgba(15, 34, 20, 0.98), rgba(10, 23, 14, 0.98));
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }}
+
+        [data-testid="stSidebar"] * {{
+            color: #f7f2e5;
+        }}
+
+        [data-testid="stSidebarNavLink"] {{
+            border-radius: 16px;
+            margin-bottom: 0.3rem;
+        }}
+
+        [data-testid="stSidebarNavLink"][aria-current="page"] {{
+            background: rgba(255, 255, 255, 0.10);
+        }}
+
+        .sidebar-box {{
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 1rem 1rem 1.1rem 1rem;
+            margin-bottom: 1rem;
+        }}
+
+        .sidebar-kicker {{
+            color: #d9b46c;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }}
+
+        .sidebar-title {{
+            color: #fff7ea;
+            font-family: var(--display-font);
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.02;
+            margin-top: 0.5rem;
+        }}
+
+        .sidebar-copy {{
+            color: rgba(255, 247, 234, 0.78);
+            font-size: 0.93rem;
+            line-height: 1.58;
+            margin-top: 0.7rem;
+        }}
+
+        .topline {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            align-items: center;
+            color: #eadcc0;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.95rem;
+            text-transform: uppercase;
+        }}
+
+        .topline-dot {{
+            color: rgba(234, 220, 192, 0.55);
+        }}
+
+        .hero-shell {{
+            background: linear-gradient(145deg, rgba(13, 31, 19, 0.95), rgba(26, 57, 34, 0.93));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 34px;
+            box-shadow: 0 30px 60px rgba(7, 17, 10, 0.26);
+            padding: 2rem;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1.2rem;
+        }}
+
+        .hero-shell::after {{
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at right top, rgba(214, 175, 98, 0.18), transparent 28%),
+                linear-gradient(90deg, rgba(214, 175, 98, 0.08), transparent 42%);
+            pointer-events: none;
+        }}
+
+        .hero-grid {{
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+            gap: 1.3rem;
+            position: relative;
+            z-index: 1;
+        }}
+
+        .hero-kicker {{
+            color: #e0bc79;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }}
+
+        .hero-title {{
+            color: #fff7ea;
+            font-family: var(--display-font);
+            font-size: clamp(2.4rem, 4.8vw, 4.2rem);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-top: 0.7rem;
+            max-width: 760px;
+        }}
+
+        .hero-copy {{
+            color: rgba(255, 247, 234, 0.82);
+            font-size: 1rem;
+            line-height: 1.72;
+            margin-top: 0.9rem;
+            max-width: 760px;
+        }}
+
+        .badge-row {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin-top: 1rem;
+        }}
+
+        .badge-pill {{
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff7ea;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.45rem 0.72rem;
+        }}
+
+        .hero-stats {{
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-top: 1.2rem;
+        }}
+
+        .hero-stat {{
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 0.9rem;
+        }}
+
+        .hero-stat-label {{
+            color: rgba(224, 188, 121, 0.95);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }}
+
+        .hero-stat-value {{
+            color: #fff7ea;
+            font-family: var(--display-font);
+            font-size: 1.65rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 0.5rem;
+        }}
+
+        .hero-stat-note {{
+            color: rgba(255, 247, 234, 0.72);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            margin-top: 0.35rem;
+        }}
+
+        .hero-aside {{
+            display: grid;
+            gap: 0.9rem;
+        }}
+
+        .hero-image-card,
+        .hero-note-card {{
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            overflow: hidden;
+        }}
+
+        .hero-image-card img {{
+            width: 100%;
+            height: 100%;
+            max-height: 330px;
+            object-fit: cover;
+            display: block;
+        }}
+
+        .hero-note-card {{
+            padding: 1rem;
+        }}
+
+        .hero-note-title {{
+            color: #fff7ea;
+            font-family: var(--display-font);
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.08;
+            margin-top: 0.4rem;
+        }}
+
+        .hero-note-copy {{
+            color: rgba(255, 247, 234, 0.75);
+            font-size: 0.94rem;
+            line-height: 1.62;
+            margin-top: 0.55rem;
+        }}
+
+        .section-block {{
+            margin: 1.55rem 0 0.85rem 0;
+        }}
+
+        .section-kicker {{
+            color: #e0bc79;
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }}
+
+        .section-title {{
+            color: #fbf7ed;
+            font-family: var(--display-font);
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            margin-top: 0.45rem;
+        }}
+
+        .section-copy {{
+            color: rgba(251, 247, 237, 0.82);
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin-top: 0.55rem;
+            max-width: 820px;
+        }}
+
+        .metric-card,
+        .insight-card,
+        .note-card {{
+            background: var(--paper);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 1.15rem;
+            height: 100%;
+            backdrop-filter: blur(8px);
+        }}
+
+        .metric-card {{
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .metric-card::before {{
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green-soft), var(--gold));
+        }}
+
+        .metric-label {{
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }}
+
+        .metric-value {{
+            color: var(--ink);
+            font-family: var(--display-font);
+            font-size: clamp(1.7rem, 2.3vw, 2.35rem);
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 0.6rem;
+            overflow-wrap: anywhere;
+        }}
+
+        .metric-note {{
+            color: var(--green-soft);
+            font-size: 0.92rem;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }}
+
+        .insight-title {{
+            color: var(--ink);
+            font-family: var(--display-font);
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1.08;
+        }}
+
+        .insight-copy {{
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.64;
+            margin-top: 0.55rem;
+        }}
+
+        .note-card {{
+            background: rgba(255, 251, 243, 0.94);
+        }}
+
+        .note-title {{
+            color: var(--ink);
+            font-family: var(--display-font);
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.08;
+        }}
+
+        .note-copy {{
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.62;
+            margin-top: 0.5rem;
+        }}
+
+        .bullet-list {{
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+        }}
+
+        .bullet-item {{
+            border-top: 1px solid var(--line);
+            padding-top: 0.8rem;
+        }}
+
+        .bullet-label {{
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }}
+
+        .bullet-value {{
+            color: var(--ink);
+            font-size: 0.98rem;
+            font-weight: 700;
+            line-height: 1.52;
+            margin-top: 0.25rem;
+        }}
+
+        .source-note {{
+            color: rgba(251, 247, 237, 0.78);
+            font-size: 0.86rem;
+            line-height: 1.55;
+            margin-top: 1rem;
+        }}
+
+        div[data-testid="stPlotlyChart"] {{
+            background: rgba(255, 251, 243, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 0.35rem;
+        }}
+
+        @media (max-width: 1100px) {{
+            .hero-grid {{
+                grid-template-columns: 1fr;
+            }}
+
+            .hero-stats {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+    </style>
+    """
+
+
 def apply_theme(page_title: str, page_icon: str) -> None:
     st.set_page_config(
         page_title=page_title,
@@ -493,13 +474,13 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    st.markdown(THEME_CSS, unsafe_allow_html=True)
+    st.markdown(_theme_css(), unsafe_allow_html=True)
 
 
 def sidebar_context(page_title: str, page_copy: str) -> None:
     st.sidebar.markdown(
         f"""
-        <div class="sidebar-shell">
+        <div class="sidebar-box">
             <div class="sidebar-kicker">Turvo Grande</div>
             <div class="sidebar-title">{page_title}</div>
             <div class="sidebar-copy">{page_copy}</div>
@@ -507,8 +488,6 @@ def sidebar_context(page_title: str, page_copy: str) -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.sidebar.caption("Base operacional: planilha de gestao da fazenda.")
-    st.sidebar.caption("Contexto de mercado: estudo estrategico em PDF, maio de 2026.")
 
 
 def topline(items: list[str]) -> None:
@@ -550,7 +529,7 @@ def hero_panel(
 
     st.markdown(
         f"""
-        <div class="hero-panel">
+        <div class="hero-shell">
             <div class="hero-grid">
                 <div>
                     <div class="hero-kicker">{kicker}</div>
@@ -562,7 +541,7 @@ def hero_panel(
                 <div class="hero-aside">
                     {image_html}
                     <div class="hero-note-card">
-                        <div class="hero-note-label">Leitura da vez</div>
+                        <div class="hero-kicker">Leitura do produtor</div>
                         <div class="hero-note-title">{note_title}</div>
                         <div class="hero-note-copy">{note_copy}</div>
                     </div>
@@ -574,11 +553,11 @@ def hero_panel(
     )
 
 
-def section_header(eyebrow: str, title: str, copy: str) -> None:
+def section_header(kicker: str, title: str, copy: str) -> None:
     st.markdown(
         f"""
-        <div class="section-shell">
-            <div class="section-eyebrow">{eyebrow}</div>
+        <div class="section-block">
+            <div class="section-kicker">{kicker}</div>
             <div class="section-title">{title}</div>
             <div class="section-copy">{copy}</div>
         </div>
@@ -600,38 +579,38 @@ def metric_card(label: str, value: str, note: str) -> None:
     )
 
 
-def info_card(kicker: str, title: str, copy: str, tone: str = "light") -> None:
-    class_name = "info-card dark" if tone == "dark" else "info-card"
+def insight_card(title: str, copy: str) -> None:
     st.markdown(
         f"""
-        <div class="{class_name}">
-            <div class="info-kicker">{kicker}</div>
-            <div class="info-title">{title}</div>
-            <div class="info-copy">{copy}</div>
+        <div class="insight-card">
+            <div class="insight-title">{title}</div>
+            <div class="insight-copy">{copy}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
-def list_card(title: str, copy: str, rows: list[dict[str, str]], callout: str | None = None) -> None:
-    rows_html = "".join(
-        f"""
-        <div class="list-row">
-            <div class="list-row-label">{row['label']}</div>
-            <div class="list-row-value">{row['value']}</div>
-        </div>
-        """
-        for row in rows
-    )
-    callout_html = f'<div class="mini-callout">{callout}</div>' if callout else ""
+def note_card(title: str, copy: str, rows: list[dict[str, str]] | None = None) -> None:
+    rows_html = ""
+    if rows:
+        items = "".join(
+            f"""
+            <div class="bullet-item">
+                <div class="bullet-label">{row['label']}</div>
+                <div class="bullet-value">{row['value']}</div>
+            </div>
+            """
+            for row in rows
+        )
+        rows_html = f'<div class="bullet-list">{items}</div>'
+
     st.markdown(
         f"""
-        <div class="list-card">
-            <div class="list-card-title">{title}</div>
-            <div class="list-card-copy">{copy}</div>
-            <div class="list-rows">{rows_html}</div>
-            {callout_html}
+        <div class="note-card">
+            <div class="note-title">{title}</div>
+            <div class="note-copy">{copy}</div>
+            {rows_html}
         </div>
         """,
         unsafe_allow_html=True,
@@ -644,12 +623,12 @@ def source_note(copy: str) -> None:
 
 def chart_style(fig: go.Figure) -> go.Figure:
     fig.update_layout(
-        font={"family": "Segoe UI, Trebuchet MS, sans-serif", "color": "#17231c"},
-        paper_bgcolor="#fffdf8",
-        plot_bgcolor="#fffdf8",
-        margin={"l": 24, "r": 24, "t": 28, "b": 24},
+        font={"family": "Trebuchet MS, Segoe UI, sans-serif", "color": "#132016"},
+        paper_bgcolor="rgba(255,251,243,0)",
+        plot_bgcolor="rgba(255,251,243,0)",
+        margin={"l": 26, "r": 26, "t": 54, "b": 24},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
     )
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="rgba(23, 35, 28, 0.08)")
-    fig.update_yaxes(gridcolor="rgba(23, 35, 28, 0.08)", zeroline=False)
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="rgba(19,32,22,0.08)")
+    fig.update_yaxes(gridcolor="rgba(19,32,22,0.08)", zeroline=False)
     return fig

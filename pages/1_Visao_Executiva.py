@@ -7,8 +7,9 @@ from app_core.components import (
     apply_theme,
     chart_style,
     hero_panel,
-    info_card,
+    insight_card,
     metric_card,
+    note_card,
     section_header,
     sidebar_context,
     source_note,
@@ -16,180 +17,249 @@ from app_core.components import (
 )
 from app_core.data import (
     commercial_metrics,
+    cost_metrics,
     formatting_helpers,
     identity_context,
-    market_context,
-    operations_story,
+    management_readiness,
+    missing_costs,
+    opportunities,
+    producer_messages,
     production_metrics,
     source_registry,
 )
 
 
-apply_theme(page_title="Turvo Grande | Visao Executiva", page_icon="🧀")
+apply_theme(page_title="Turvo Grande | Visao Atual do Negocio", page_icon="🧀")
 sidebar_context(
-    page_title="Visao Executiva",
-    page_copy="Panorama de negocio com operacao atual, posicionamento do produto e prioridades imediatas.",
+    page_title="Visao Atual do Negocio",
+    page_copy=(
+        "Leitura rapida da fazenda para entender producao, dinheiro que entra, "
+        "dependencia comercial e o que ainda falta fechar na gestao."
+    ),
 )
 
 fmt = formatting_helpers()
 identity = identity_context()
 production = production_metrics()
 commercial = commercial_metrics()
-operations = operations_story()
-market = market_context()
+costs = cost_metrics()
+readiness = management_readiness()
+pending_costs = missing_costs()
+practical_messages = producer_messages()
+next_moves = opportunities()
 sources = source_registry()
 
 topline(
     [
         identity["operation_name"],
         identity["location"],
-        "Planilha operacional + estudo de mercado",
+        "Pagina 1",
+        "Leitura para o produtor",
     ]
 )
 
 hero_panel(
-    kicker="Visao Executiva",
-    title=operations["headline"],
-    copy=operations["summary"],
+    kicker="Pagina 1 | Visao atual do negocio",
+    title="O retrato de hoje da Fazenda Turvo Grande",
+    copy=(
+        "Aqui a ideia e simples: mostrar, de um jeito claro, como a fazenda gira hoje, "
+        "quanto ela entrega por mes, por onde o dinheiro entra e onde esta o principal "
+        "ponto de atencao antes de pensar em crescer."
+    ),
     badges=[
         identity["product_name"],
-        "IG Serro",
-        "Premiacao 2019",
+        "Materlandia, Serro (MG)",
+        "Venda atual em cooperativa",
     ],
     stats=[
         {
-            "label": "Producao mensal",
+            "label": "Producao por mes",
             "value": fmt["number"](production["queijos_mes"], suffix=" queijos"),
-            "note": "Volume atual consolidado a partir da planilha da fazenda.",
+            "note": "Volume ja calculado na planilha da fazenda.",
         },
         {
-            "label": "Escala fisica",
-            "value": fmt["number"](production["kg_mes"], decimals=1, suffix=" kg"),
-            "note": "Peso mensal equivalente com base no peso medio informado.",
-        },
-        {
-            "label": "Receita bruta",
+            "label": "Receita bruta atual",
             "value": fmt["currency"](commercial["receita_bruta"]),
-            "note": "Venda atual concentrada em cooperativa.",
+            "note": "Entrada bruta mensal no modelo atual de venda.",
+        },
+        {
+            "label": "Custos fechados",
+            "value": f"{readiness['filled_count']}/{costs['total_count']}",
+            "note": "Hoje a gestao ainda esta incompleta no lado dos custos.",
         },
     ],
-    note_title="Ativo premium, canal simples",
+    note_title="Leitura bem direta",
     note_copy=(
-        "O produto ja carrega origem, premiacao e identidade visual forte. "
-        "O gargalo hoje esta mais na captura de valor do que na narrativa de marca."
+        "A fazenda ja tem producao, ritmo e produto com nome. O que falta agora e "
+        "enxergar melhor o lucro real e reduzir a dependencia de um canal so."
     ),
 )
 
-metric_cols = st.columns(4)
-with metric_cols[0]:
-    metric_card("Operacao", identity["operation_name"], "Leitura atual da fazenda")
-with metric_cols[1]:
-    metric_card("Produto", identity["product_name"], "Queijo artesanal com origem definida")
-with metric_cols[2]:
-    metric_card("Preco atual", fmt["currency"](commercial["preco_kg"]), "Recebimento por kg via cooperativa")
-with metric_cols[3]:
-    metric_card("Canal", commercial["canal"], "Dependencia comercial concentrada")
+kpi_cols = st.columns(5)
+with kpi_cols[0]:
+    metric_card("Queijos por dia", fmt["number"](production["queijos_dia"]), "Saida media diaria")
+with kpi_cols[1]:
+    metric_card("Queijos por semana", fmt["number"](production["queijos_semana"]), "Ritmo semanal da producao")
+with kpi_cols[2]:
+    metric_card("Kg por mes", fmt["number"](production["kg_mes"], decimals=1, suffix=" kg"), "Escala fisica mensal")
+with kpi_cols[3]:
+    metric_card("Preco atual", fmt["currency"](commercial["preco_kg"]), "Recebimento por kg hoje")
+with kpi_cols[4]:
+    metric_card("Dependencia do canal", fmt["percent"](commercial["pct_cooperativa"]), "Parcela vendida para cooperativa")
 
 section_header(
-    "Panorama",
-    "Leitura executiva da operacao",
-    "A pagina agora responde a tres perguntas: qual e a base operacional, qual e o ativo competitivo do produto e o que precisa ser resolvido primeiro para subir de patamar.",
+    "Raio-x rapido",
+    "Hoje o negocio esta assim",
+    "Esses cards resumem o que mais importa para quem esta no dia a dia da fazenda: rotina, venda e clareza de resultado.",
 )
 
-panorama_cols = st.columns(3)
-with panorama_cols[0]:
-    info_card(
-        "Canal atual",
-        "Toda a venda hoje passa pela cooperativa.",
-        "Isso reduz complexidade comercial no curto prazo, mas tambem limita margem, aprendizagem de mercado e construcao de canal proprio.",
-    )
-with panorama_cols[1]:
-    info_card(
-        "Ativo de valor",
-        "Origem, IG e premiacao puxam o posicionamento para cima.",
-        "O diferencial do Turvo Grande nao e volume industrial. E reputacao, territorio e percepcao de autenticidade.",
-        tone="dark",
-    )
-with panorama_cols[2]:
-    info_card(
-        "Ponto critico",
-        "A expansao depende de validacao operacional e familiar.",
-        "Antes de discutir escala ou marca, a operacao precisa confirmar capacidade produtiva, governanca e regularizacao.",
-    )
+message_cols = st.columns(3)
+for column, message in zip(message_cols, practical_messages):
+    with column:
+        insight_card(message["title"], message["copy"])
 
 section_header(
-    "Base atual",
-    "Operacao real e concentracao de canal",
-    "A leitura abaixo separa o que a fazenda efetivamente produz do modo como a receita esta organizada hoje.",
+    "Numeros que contam a historia",
+    "Graficos para bater o olho e entender",
+    "Os dois primeiros mostram escala e concentracao de venda. Os dois seguintes mostram o quanto da gestao ja esta organizado e quanto ainda falta fechar.",
 )
 
 cadence_fig = go.Figure(
     data=[
         go.Bar(
-            x=[item["label"] for item in operations["cadence"]],
-            y=[item["value"] for item in operations["cadence"]],
-            marker_color=["#173e2d", "#2c6b4b", "#b98433"],
-            text=[f"{int(item['value'])}" for item in operations["cadence"]],
+            x=["Dia", "Semana", "Mes"],
+            y=[
+                production["queijos_dia"] or 0,
+                production["queijos_semana"] or 0,
+                production["queijos_mes"] or 0,
+            ],
+            marker_color=["#2d6542", "#47855c", "#c79a47"],
+            text=[
+                f"{int(production['queijos_dia'] or 0)}",
+                f"{int(production['queijos_semana'] or 0)}",
+                f"{int(production['queijos_mes'] or 0)}",
+            ],
             textposition="outside",
         )
     ]
 )
 cadence_fig.update_layout(
-    title="Cadencia operacional",
-    yaxis_title="Queijos",
+    title="Ritmo da producao",
+    yaxis_title="Quantidade de queijos",
     showlegend=False,
 )
 
-share = commercial["pct_cooperativa"] or 0
-donut_rest = max(0.0, 100.0 - float(share))
+cooperativa_share = float(commercial["pct_cooperativa"] or 0)
+outros_share = max(0.0, 100.0 - cooperativa_share)
 channel_fig = go.Figure(
     data=[
         go.Pie(
             labels=["Cooperativa", "Outros canais"],
-            values=[float(share), donut_rest if donut_rest > 0 else 0.001],
+            values=[cooperativa_share, outros_share if outros_share > 0 else 0.001],
             hole=0.68,
-            marker={"colors": ["#173e2d", "#d8c2a4"]},
+            marker={"colors": ["#214a2d", "#d9c39d"]},
             textinfo="label+percent",
             sort=False,
         )
     ]
 )
-channel_fig.update_layout(title="Concentracao de canal", showlegend=False)
+channel_fig.update_layout(
+    title="Por onde a venda passa hoje",
+    showlegend=False,
+)
 
-chart_cols = st.columns(2)
-with chart_cols[0]:
+readiness_fig = go.Figure(
+    go.Indicator(
+        mode="gauge+number",
+        value=readiness["readiness_pct"],
+        number={"suffix": "%"},
+        title={"text": "Prontidao da gestao de custos"},
+        gauge={
+            "axis": {"range": [0, 100]},
+            "bar": {"color": "#c79a47"},
+            "bgcolor": "#efe4d1",
+            "steps": [
+                {"range": [0, 35], "color": "#d99a73"},
+                {"range": [35, 70], "color": "#d9c39d"},
+                {"range": [70, 100], "color": "#7aa16c"},
+            ],
+        },
+    )
+)
+
+costs_fig = go.Figure()
+costs_fig.add_trace(
+    go.Bar(
+        y=["Custos conhecidos", "Custos a descobrir"],
+        x=[costs["known_count"], costs["discover_count"]],
+        orientation="h",
+        marker_color=["#2d6542", "#c79a47"],
+        text=[str(costs["known_count"]), str(costs["discover_count"])],
+        textposition="outside",
+    )
+)
+costs_fig.update_layout(
+    title="Mapa de custos ja previsto",
+    xaxis_title="Quantidade de linhas de custo",
+    showlegend=False,
+)
+
+chart_row_top = st.columns(2)
+with chart_row_top[0]:
     st.plotly_chart(chart_style(cadence_fig), use_container_width=True, config={"displayModeBar": False})
-with chart_cols[1]:
+with chart_row_top[1]:
     st.plotly_chart(chart_style(channel_fig), use_container_width=True, config={"displayModeBar": False})
 
-section_header(
-    "Valorizadores",
-    "O que sustenta um posicionamento mais premium",
-    "Esses sinais vem do estudo estrategico e ajudam a enquadrar o produto como ativo de valor, nao como commodity regional.",
-)
-
-highlight_cols = st.columns(4)
-for column, highlight in zip(highlight_cols, market["highlights"]):
-    with column:
-        metric_card(highlight["label"], highlight["value"], highlight["note"])
+chart_row_bottom = st.columns(2)
+with chart_row_bottom[0]:
+    st.plotly_chart(chart_style(readiness_fig), use_container_width=True, config={"displayModeBar": False})
+with chart_row_bottom[1]:
+    st.plotly_chart(chart_style(costs_fig), use_container_width=True, config={"displayModeBar": False})
 
 section_header(
-    "Prioridades",
-    "O que deveria acontecer nos proximos 15 dias",
-    "O plano abaixo resume a sequencia sugerida pelo estudo: primeiro validar gente e capacidade, depois canal e regularizacao.",
+    "O que ainda falta fechar",
+    "Pontos que precisam entrar no caderno",
+    "Sem esses valores, a fazenda ate sabe quanto produz e quanto vende, mas ainda nao enxerga com seguranca quanto realmente sobra.",
 )
 
-plan_cols_top = st.columns(3)
-for column, item in zip(plan_cols_top, market["action_plan"][:3]):
-    with column:
-        info_card(item["window"], item["title"], item["copy"])
+pending_rows = [
+    {
+        "label": item["category"],
+        "value": f"{item['method']} | Status: {item['status']}",
+    }
+    for item in pending_costs
+]
 
-plan_cols_bottom = st.columns(2)
-for column, item in zip(plan_cols_bottom, market["action_plan"][3:]):
+note_cols = st.columns([1.1, 0.9])
+with note_cols[0]:
+    note_card(
+        "Custos sem valor mensal informado",
+        "Esses sao os primeiros itens para fechar se a ideia e ter uma visao mais firme do lucro real.",
+        rows=pending_rows,
+    )
+with note_cols[1]:
+    note_card(
+        "Leitura pratica da situacao",
+        readiness["message"],
+        rows=[
+            {"label": "Linhas com valor", "value": str(readiness["filled_count"])},
+            {"label": "Linhas sem valor", "value": str(readiness["pending_count"])},
+            {"label": "Mensagem do momento", "value": "Primeiro fechar custo. Depois acelerar."},
+        ],
+    )
+
+section_header(
+    "Proximo passo sem enrolacao",
+    "Onde vale mexer primeiro",
+    "A ideia aqui nao e complicar a lida. E escolher movimentos simples que deem mais clareza e mais valor para o negocio.",
+)
+
+opportunity_cols = st.columns(3)
+for column, opportunity in zip(opportunity_cols, next_moves):
     with column:
-        info_card(item["window"], item["title"], item["copy"], tone="dark")
+        insight_card(opportunity["title"], opportunity["copy"])
 
 source_note(
-    f"Fontes da pagina: {sources['operational']} e {sources['market']}. "
-    "Os blocos estrategicos desta tela sao sintetizados a partir do estudo em PDF de maio de 2026."
+    f"Fontes desta tela: {sources['operational']} e apoio estrategico de {sources['market']}. "
+    "Os numeros exibidos como fato atual saem da planilha da fazenda."
 )

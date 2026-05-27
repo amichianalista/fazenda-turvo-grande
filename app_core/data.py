@@ -11,6 +11,7 @@ import zipfile
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SOURCE_FILE = ROOT_DIR / "Referenciais Iniciais" / "planilha de gestao.ods"
+BACKGROUND_IMAGE = ROOT_DIR / "assets" / "background.png"
 PRODUCT_IMAGE = ROOT_DIR / "assets" / "queijopremiado.png"
 
 NS = {
@@ -154,8 +155,6 @@ def identity_context() -> dict[str, str]:
         "operation_name": operation_name,
         "product_name": product_name,
         "location": location,
-        "region": "Serro (MG)",
-        "territory_label": "Microrregiao do Serro",
     }
 
 
@@ -209,17 +208,11 @@ def production_metrics() -> dict[str, float | str | None]:
 
     return {
         "dias_semana": _first_number(dias_semana_text),
-        "dias_semana_text": dias_semana_text,
         "queijos_dia": _first_number(queijos_dia_text),
-        "queijos_dia_text": queijos_dia_text,
         "peso_medio_kg": _first_number(peso_medio_text),
-        "peso_medio_kg_text": peso_medio_text,
         "queijos_semana": _first_number(_lookup(results, "Queijos por semana")),
-        "queijos_semana_text": _lookup(results, "Queijos por semana"),
         "queijos_mes": _first_number(_lookup(results, "Queijos por mes")),
-        "queijos_mes_text": _lookup(results, "Queijos por mes"),
         "kg_mes": _first_number(_lookup(results, "Kg de queijo por mes")),
-        "kg_mes_text": _lookup(results, "Kg de queijo por mes"),
     }
 
 
@@ -234,222 +227,9 @@ def commercial_metrics() -> dict[str, float | str | None]:
 
     return {
         "preco_kg": _first_number(preco_text),
-        "preco_kg_text": preco_text,
         "pct_cooperativa": _first_number(pct_text),
-        "pct_cooperativa_text": pct_text,
         "receita_bruta": _first_number(receita_text),
-        "receita_bruta_text": receita_text,
         "canal": "Cooperativa",
-    }
-
-
-def operations_story() -> dict[str, object]:
-    production = production_metrics()
-    commercial = commercial_metrics()
-    identity = identity_context()
-
-    cadence = [
-        {"label": "Dia", "value": production["queijos_dia"] or 0},
-        {"label": "Semana", "value": production["queijos_semana"] or 0},
-        {"label": "Mes", "value": production["queijos_mes"] or 0},
-    ]
-
-    formula_steps = [
-        {
-            "label": "Dias de producao",
-            "value": _to_number(production["dias_semana"], suffix=" dias/semana"),
-        },
-        {
-            "label": "Saida por dia",
-            "value": _to_number(production["queijos_dia"], suffix=" queijos"),
-        },
-        {
-            "label": "Peso medio",
-            "value": _to_number(production["peso_medio_kg"], decimals=1, suffix=" kg/peca"),
-        },
-        {
-            "label": "Receita atual",
-            "value": _to_currency(commercial["receita_bruta"]),
-        },
-    ]
-
-    return {
-        "headline": "Operacao atual e potencial de captura de valor do Turvo Grande",
-        "summary": (
-            "A fazenda opera com cadencia recorrente, venda concentrada em cooperativa "
-            "e um ativo de marca forte para evoluir em canal e posicionamento."
-        ),
-        "cadence": cadence,
-        "formula_steps": formula_steps,
-        "location_line": f"{identity['product_name']} | {identity['location']}",
-    }
-
-
-@lru_cache(maxsize=1)
-def market_context() -> dict[str, object]:
-    return {
-        "hero_title": "Mercado, reputacao e espaco de expansao",
-        "hero_copy": (
-            "O estudo estrategico mostra que o principal valor do Turvo Grande esta na "
-            "origem, na premiacao e na aderencia ao canal premium, e nao em competir por preco."
-        ),
-        "highlights": [
-            {
-                "label": "Premiacao",
-                "value": "Mondial du Fromage 2019",
-                "note": "Ativo raro de reputacao para um queijo artesanal regional.",
-            },
-            {
-                "label": "Indicacao geografica",
-                "value": "IG Serro desde 2011",
-                "note": "Origem protegida, rastreavel e valorizada no varejo especializado.",
-            },
-            {
-                "label": "Referencia de varejo",
-                "value": "R$ 96 a R$ 140 por peca",
-                "note": "Faixa observada no estudo para pecas premium de 700g a 1kg.",
-            },
-            {
-                "label": "Base regional",
-                "value": "~800 produtores",
-                "note": "Escala territorial relevante e disputa por atencao qualificada.",
-            },
-        ],
-        "market_stats": [
-            {
-                "label": "Consumo artesanal",
-                "value": "20%",
-                "note": "Participacao estimada do artesanal no consumo nacional citado no estudo.",
-            },
-            {
-                "label": "Formalizacao",
-                "value": "+300%",
-                "note": "Crescimento observado em queijarias formalizadas em SP.",
-            },
-            {
-                "label": "Ticket premium",
-                "value": "R$ 96-R$ 140",
-                "note": "Benchmark de varejo premium identificado em maio de 2026.",
-            },
-        ],
-        "seasonality": [
-            {"quarter": "Q1", "period": "Jan-Mar", "index": 72},
-            {"quarter": "Q2", "period": "Abr-Jun", "index": 88},
-            {"quarter": "Q3", "period": "Jul-Set", "index": 65},
-            {"quarter": "Q4", "period": "Out-Dez", "index": 100},
-        ],
-        "competitors": [
-            {
-                "name": "Produtores do Serro",
-                "score": 60,
-                "threat": "Media",
-                "detail": "Mesmo terroir, mesma IG e mesmo mercado base.",
-            },
-            {
-                "name": "Canastra premium",
-                "score": 92,
-                "threat": "Alta",
-                "detail": "Marca mais nacionalizada e e-commerce consolidado.",
-            },
-            {
-                "name": "Emporios e distribuidores",
-                "score": 48,
-                "threat": "Indireta",
-                "detail": "Agregam alcance, mas capturam margem de canal.",
-            },
-            {
-                "name": "Industriais",
-                "score": 20,
-                "threat": "Baixa",
-                "detail": "Competem em volume e preco, nao em atributo premium.",
-            },
-        ],
-        "opportunities": [
-            {
-                "title": "Venda direta em plataformas",
-                "ticket": "R$ 90 a R$ 140 por peca",
-                "potential_score": 90,
-                "complexity_score": 45,
-                "next_step": "Validar cadastro em uma plataforma especializada.",
-                "detail": "Canal com captura imediata de margem e prova de demanda.",
-            },
-            {
-                "title": "Linha maturada premium",
-                "ticket": "R$ 96 a R$ 160 por peca",
-                "potential_score": 86,
-                "complexity_score": 82,
-                "next_step": "Dimensionar câmara, maturacao e padrao tecnico.",
-                "detail": "Maior valor unitario, com barreira tecnica defensavel.",
-            },
-            {
-                "title": "Restaurantes e chefs",
-                "ticket": "R$ 60 a R$ 90 por kg",
-                "potential_score": 74,
-                "complexity_score": 55,
-                "next_step": "Montar amostra comercial e roteiro BH/SP.",
-                "detail": "Canal recorrente, reputacional e com volume mais previsivel.",
-            },
-            {
-                "title": "Turismo e venda na fazenda",
-                "ticket": "R$ 40 a R$ 80 por visitante",
-                "potential_score": 62,
-                "complexity_score": 58,
-                "next_step": "Mapear adequacoes minimas e aderencia familiar.",
-                "detail": "Receita complementar com alta forca de marca.",
-            },
-        ],
-        "risks": [
-            {
-                "title": "Governanca e sucessao",
-                "copy": "Sem clareza sobre quem assume a producao, a expansao fica fragil.",
-            },
-            {
-                "title": "Capacidade produtiva",
-                "copy": "Antes de vender mais caro, e preciso confirmar rebanho, estrutura e consistencia.",
-            },
-            {
-                "title": "Regularizacao",
-                "copy": "Selo Arte, SIF e requisitos sanitarios definem o teto real de canal.",
-            },
-            {
-                "title": "Maturacao",
-                "copy": "Linha premium exige câmara, controle e padrao tecnico, nao improviso.",
-            },
-        ],
-        "action_plan": [
-            {
-                "window": "Dias 1-3",
-                "title": "Conversa franca com a familia",
-                "copy": "Confirmar abertura real para continuidade, papeis e limites da operacao.",
-            },
-            {
-                "window": "Dias 4-6",
-                "title": "Diagnostico tecnico da fazenda",
-                "copy": "Levantar volume atual, estrutura, sanidade e capacidade de escala.",
-            },
-            {
-                "window": "Dias 7-9",
-                "title": "Pesquisa de canal e preco",
-                "copy": "Mapear 3 a 5 canais especializados e suas exigencias de entrada.",
-            },
-            {
-                "window": "Dias 10-12",
-                "title": "Contato com SENAR / Emater",
-                "copy": "Entender apoio tecnico e caminho de regularizacao para expansao.",
-            },
-            {
-                "window": "Dias 13-15",
-                "title": "Decisao de proximo passo",
-                "copy": "Escolher um canal piloto com volume minimo e meta de validacao.",
-            },
-        ],
-        "sources": [
-            "Planilha operacional da fazenda",
-            "Analise estrategica de mercado Turvo Grande, maio de 2026",
-        ],
-        "opportunity_note": (
-            "Scores de potencial e complexidade sao uma sintese analitica derivada do estudo em PDF."
-        ),
     }
 
 
@@ -483,9 +263,7 @@ def cost_entries() -> list[dict[str, str | bool | float | None]]:
         value_text = _clean_spaces(row[2]) if len(row) > 2 else ""
         method_text = _clean_spaces(row[3]) if len(row) > 3 else ""
         status_text = _clean_spaces(row[4]) if len(row) > 4 else ""
-        note_text = _clean_spaces(row[6]) if len(row) > 6 else ""
         numeric_value = _first_number(value_text)
-        has_value = numeric_value is not None
 
         items.append(
             {
@@ -494,94 +272,109 @@ def cost_entries() -> list[dict[str, str | bool | float | None]]:
                 "value_text": value_text or "Nao preenchido",
                 "method_text": method_text or "Sem orientacao",
                 "status_text": status_text or "Sem status",
-                "note_text": note_text or "",
                 "value_numeric": numeric_value,
-                "has_value": has_value,
+                "has_value": numeric_value is not None,
             }
         )
 
     return items
 
 
-def known_costs() -> list[dict[str, str | bool | float | None]]:
-    return [item for item in cost_entries() if item["group"] == "known"]
-
-
-def discover_costs() -> list[dict[str, str | bool | float | None]]:
-    return [item for item in cost_entries() if item["group"] == "discover"]
-
-
 def cost_metrics() -> dict[str, int]:
-    known = known_costs()
-    discover = discover_costs()
+    known = sum(1 for item in cost_entries() if item["group"] == "known")
+    discover = sum(1 for item in cost_entries() if item["group"] == "discover")
     filled = sum(1 for item in cost_entries() if item["has_value"])
+    total = len(cost_entries())
 
     return {
-        "known_count": len(known),
-        "discover_count": len(discover),
+        "known_count": known,
+        "discover_count": discover,
         "filled_count": filled,
-        "pending_count": len(cost_entries()) - filled,
-        "total_count": len(cost_entries()),
+        "pending_count": max(total - filled, 0),
+        "total_count": total,
     }
 
 
-def cost_summary() -> dict[str, str]:
-    total_known = sum(float(item["value_numeric"]) for item in known_costs() if item["value_numeric"] is not None)
-    total_discover = sum(
-        float(item["value_numeric"]) for item in discover_costs() if item["value_numeric"] is not None
-    )
-    current_total = total_known + total_discover
-
-    return {
-        "known_total_text": _to_currency(total_known),
-        "discover_total_text": _to_currency(total_discover),
-        "current_total_text": _to_currency(current_total),
-    }
+def missing_costs(limit: int = 5) -> list[dict[str, str]]:
+    pending = [item for item in cost_entries() if not item["has_value"]]
+    return [
+        {
+            "category": str(item["category"]),
+            "method": str(item["method_text"]),
+            "status": str(item["status_text"]),
+        }
+        for item in pending[:limit]
+    ]
 
 
-def cost_readiness() -> dict[str, object]:
+def management_readiness() -> dict[str, object]:
     metrics = cost_metrics()
+    total = metrics["total_count"] or 1
+    readiness_pct = round((metrics["filled_count"] / total) * 100)
+
     return {
-        "status_split": [
-            {"label": "Com valor", "value": metrics["filled_count"]},
-            {"label": "Sem valor", "value": metrics["pending_count"]},
-        ],
-        "group_split": [
-            {"label": "Custos conhecidos", "value": metrics["known_count"]},
-            {"label": "Custos a descobrir", "value": metrics["discover_count"]},
-        ],
-        "next_steps": [
-            "Transformar os custos conhecidos em valores mensais.",
-            "Levantar energia, alimentacao do gado, manutencao e veterinario.",
-            "Fechar taxa da cooperativa com contrato ou extrato real.",
-            "So depois consolidar custo total, lucro e margem com seguranca.",
-        ],
+        "readiness_pct": readiness_pct,
+        "filled_count": metrics["filled_count"],
+        "pending_count": metrics["pending_count"],
+        "known_count": metrics["known_count"],
+        "discover_count": metrics["discover_count"],
+        "message": (
+            "A producao e a receita ja estao na mao. O que ainda segura o lucro real "
+            "e fechar os custos que faltam entrar no caderno."
+        ),
     }
+
+
+@lru_cache(maxsize=1)
+def opportunities() -> list[dict[str, str]]:
+    return [
+        {
+            "title": "Vender um pedaco em canal direto",
+            "copy": (
+                "Sem mexer em tudo de uma vez, a fazenda pode testar um canal pequeno "
+                "de venda direta e aprender onde o produto ganha mais valor."
+            ),
+        },
+        {
+            "title": "Criar uma linha mais valorizada",
+            "copy": (
+                "O queijo tem origem forte e historia boa. Com maturacao bem cuidada, "
+                "pode entrar numa faixa de preco mais nobre."
+            ),
+        },
+        {
+            "title": "Fechar o custo antes de acelerar",
+            "copy": (
+                "O melhor ganho agora talvez nem seja vender mais, e sim entender direito "
+                "quanto sobra por mes para decidir com seguranca."
+            ),
+        },
+    ]
+
+
+def producer_messages() -> list[dict[str, str]]:
+    return [
+        {
+            "title": "Produz todo dia, com cadencia boa",
+            "copy": "A rotina de producao esta firme. Isso e base boa para crescer sem dar tranco.",
+        },
+        {
+            "title": "Hoje o dinheiro entra por um canal so",
+            "copy": "A cooperativa resolve a saida, mas deixa a fazenda dependente de um unico caminho.",
+        },
+        {
+            "title": "O lucro real ainda nao esta fechado",
+            "copy": "Enquanto varios custos seguem sem valor mensal, o numero final fica incompleto.",
+        },
+    ]
 
 
 def source_registry() -> dict[str, str]:
     return {
         "operational": "Referenciais Iniciais/planilha de gestao.ods",
         "market": "Referenciais Iniciais/queijo_turvo_grande.pdf",
+        "background": str(BACKGROUND_IMAGE),
         "product_image": str(PRODUCT_IMAGE),
-    }
-
-
-def overview_metrics() -> dict[str, str]:
-    production = production_metrics()
-    commercial = commercial_metrics()
-    identity = identity_context()
-
-    return {
-        "operation_name": identity["operation_name"],
-        "product_name": identity["product_name"],
-        "location": identity["location"],
-        "queijos_dia": _to_number(production["queijos_dia"], suffix=" un."),
-        "queijos_mes": _to_number(production["queijos_mes"], suffix=" un."),
-        "kg_mes": _to_number(production["kg_mes"], decimals=1, suffix=" kg"),
-        "receita_bruta": _to_currency(commercial["receita_bruta"]),
-        "preco_kg": _to_currency(commercial["preco_kg"]),
-        "pct_cooperativa": _to_percent(commercial["pct_cooperativa"]),
     }
 
 
