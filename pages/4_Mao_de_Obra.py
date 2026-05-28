@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import streamlit as st
-
 from app_core.components import apply_theme, form_intro, render_page_nav, source_note, topline
-from app_core.db import insert_row, payload_has_values
 from app_core.data import identity_context
+from app_core.field_forms import render_field_group
 
 
 apply_theme(page_title="Turvo Grande | Mao de Obra", page_icon="ðŸ§€")
@@ -25,57 +23,21 @@ form_intro(
     kicker="Pagina 4 | Mao de Obra",
     title="Formulario de Mao de Obra",
     copy=(
-        "Estrutura inicial para entender quem toca a operacao no dia a dia, qual o peso da "
-        "familia no trabalho e quanto tempo vai para a producao."
+        "Estrutura inicial para entender quem toca a operacao no dia a dia. Agora cada "
+        "campo pode ser enviado separadamente."
     ),
     tags=["Equipe", "Familia", "Funcionarios", "Rotina"],
 )
 
+source_note("Cada campo abaixo tem sua propria caixa e seu proprio botao de envio. Cada envio gera um novo registro parcial.")
 
-def save_mao_de_obra_block(block_title: str, payload: dict[str, str | None]) -> None:
-    if not payload_has_values(payload):
-        st.warning(f"Preencha pelo menos um campo em {block_title.lower()} antes de enviar.")
-        return
-
-    try:
-        record_id = insert_row("mao_de_obra", payload)
-    except Exception as exc:
-        st.error(f"Nao foi possivel salvar o bloco {block_title.lower()} no Supabase: {exc}")
-    else:
-        st.success(f"{block_title} enviado com sucesso. ID do registro: {record_id}")
-
-
-source_note("Cada bloco abaixo pode ser enviado separadamente. Cada envio gera um novo registro parcial.")
-
-with st.form("form_mao_de_obra_equipe", clear_on_submit=True):
-    st.markdown("### Equipe atual")
-    col1, col2 = st.columns(2)
-    with col1:
-        quantas_pessoas_trabalham = st.text_input("Quantas pessoas trabalham?", placeholder="Ex.: 4")
-        quantas_pessoas_da_familia = st.text_input("Quantas da familia?", placeholder="Ex.: 2")
-    with col2:
-        quantos_funcionarios = st.text_input("Quantos funcionarios?", placeholder="Ex.: 2")
-    submitted_equipe = st.form_submit_button("Enviar Equipe atual")
-
-if submitted_equipe:
-    save_mao_de_obra_block(
-        "Equipe atual",
-        {
-            "quantas_pessoas_trabalham": quantas_pessoas_trabalham,
-            "quantas_pessoas_da_familia": quantas_pessoas_da_familia,
-            "quantos_funcionarios": quantos_funcionarios,
-        },
-    )
-
-with st.form("form_mao_de_obra_rotina", clear_on_submit=True):
-    st.markdown("### Rotina de producao")
-    horas_por_dia_na_producao = st.text_input("Horas por dia na producao?", placeholder="Ex.: 8 horas")
-    submitted_rotina = st.form_submit_button("Enviar Rotina de producao")
-
-if submitted_rotina:
-    save_mao_de_obra_block(
-        "Rotina de producao",
-        {
-            "horas_por_dia_na_producao": horas_por_dia_na_producao,
-        },
-    )
+render_field_group(
+    table="mao_de_obra",
+    title="Equipe atual",
+    fields=[
+        {"name": "quantas_pessoas_trabalham", "label": "Quantas pessoas trabalham?", "placeholder": "Ex.: 4", "form_key": "quantas_pessoas_trabalham"},
+        {"name": "quantas_pessoas_da_familia", "label": "Quantas da familia?", "placeholder": "Ex.: 2", "form_key": "quantas_pessoas_da_familia"},
+        {"name": "quantos_funcionarios", "label": "Quantos funcionarios?", "placeholder": "Ex.: 2", "form_key": "quantos_funcionarios"},
+        {"name": "horas_por_dia_na_producao", "label": "Horas por dia na producao?", "placeholder": "Ex.: 8 horas", "form_key": "horas_por_dia_na_producao"},
+    ],
+)

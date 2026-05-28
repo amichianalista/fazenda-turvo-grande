@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import streamlit as st
-
 from app_core.components import apply_theme, form_intro, render_page_nav, source_note, topline
-from app_core.db import insert_row, payload_has_values
 from app_core.data import identity_context
+from app_core.field_forms import render_field_group
 
 
 apply_theme(page_title="Turvo Grande | Custos", page_icon="ðŸ§€")
@@ -25,109 +23,51 @@ form_intro(
     kicker="Pagina 3 | Custos",
     title="Formulario de Custos",
     copy=(
-        "Pagina pensada para registrar o retrato dos custos da operacao. Aqui a leitura "
-        "fica dividida entre custos fixos da estrutura e custos variaveis ligados a producao."
+        "Pagina pensada para registrar o retrato dos custos da operacao. Aqui cada campo "
+        "ganha sua propria caixa com envio individual."
     ),
     tags=["Custos Fixos", "Custos Variaveis", "Estrutura", "Alimentacao"],
 )
 
+source_note("Cada campo abaixo tem sua propria caixa e seu proprio botao de envio. Cada envio gera um novo registro parcial.")
 
-def save_cost_block(table: str, block_title: str, payload: dict[str, str | None]) -> None:
-    if not payload_has_values(payload):
-        st.warning(f"Preencha pelo menos um campo em {block_title.lower()} antes de enviar.")
-        return
+render_field_group(
+    table="custos_fixos",
+    title="Custos fixos | Estrutura",
+    fields=[
+        {"name": "estrutura_energia_eletrica_mensal", "label": "Energia eletrica mensal", "placeholder": "Ex.: R$ 1.250", "form_key": "estrutura_energia_eletrica_mensal"},
+        {"name": "estrutura_agua_mensal", "label": "Agua mensal", "placeholder": "Ex.: R$ 180", "form_key": "estrutura_agua_mensal"},
+        {"name": "estrutura_internet_telefone", "label": "Internet/telefone", "placeholder": "Ex.: R$ 150", "form_key": "estrutura_internet_telefone"},
+        {"name": "estrutura_manutencao", "label": "Manutencao", "placeholder": "Ex.: R$ 600", "form_key": "estrutura_manutencao"},
+        {"name": "estrutura_combustivel", "label": "Combustivel", "placeholder": "Ex.: R$ 900", "form_key": "estrutura_combustivel"},
+        {"name": "estrutura_financiamentos", "label": "Financiamentos", "placeholder": "Ex.: R$ 2.300", "form_key": "estrutura_financiamentos"},
+        {"name": "estrutura_impostos", "label": "Impostos", "placeholder": "Ex.: R$ 400", "form_key": "estrutura_impostos"},
+        {"name": "estrutura_funcionarios_fixos", "label": "Funcionarios fixos", "placeholder": "Ex.: R$ 3.200", "form_key": "estrutura_funcionarios_fixos"},
+    ],
+)
 
-    try:
-        record_id = insert_row(table, payload)
-    except Exception as exc:
-        st.error(f"Nao foi possivel salvar o bloco {block_title.lower()} no Supabase: {exc}")
-    else:
-        st.success(f"{block_title} enviado com sucesso. ID do registro: {record_id}")
+render_field_group(
+    table="custos_variaveis",
+    title="Custos variaveis | Producao",
+    fields=[
+        {"name": "producao_sal", "label": "Sal", "placeholder": "Ex.: R$ 180/mes", "form_key": "producao_sal"},
+        {"name": "producao_coalho", "label": "Coalho", "placeholder": "Ex.: R$ 140/mes", "form_key": "producao_coalho"},
+        {"name": "producao_embalagem", "label": "Embalagem", "placeholder": "Ex.: R$ 220/mes", "form_key": "producao_embalagem"},
+        {"name": "producao_etiqueta", "label": "Etiqueta", "placeholder": "Ex.: R$ 90/mes", "form_key": "producao_etiqueta"},
+        {"name": "producao_transporte", "label": "Transporte", "placeholder": "Ex.: R$ 350/mes", "form_key": "producao_transporte"},
+        {"name": "producao_frete", "label": "Frete", "placeholder": "Ex.: R$ 500/mes", "form_key": "producao_frete"},
+        {"name": "producao_insumos_limpeza", "label": "Insumos de limpeza", "placeholder": "Ex.: R$ 160/mes", "form_key": "producao_insumos_limpeza"},
+    ],
+)
 
-
-source_note("Cada bloco abaixo pode ser enviado separadamente. Cada envio gera um novo registro parcial.")
-
-with st.form("form_custos_fixos", clear_on_submit=True):
-    st.markdown("### Custos fixos | Estrutura")
-    col1, col2 = st.columns(2)
-    with col1:
-        estrutura_energia_eletrica_mensal = st.text_input("Energia eletrica mensal", placeholder="Ex.: R$ 1.250")
-        estrutura_agua_mensal = st.text_input("Agua mensal", placeholder="Ex.: R$ 180")
-        estrutura_internet_telefone = st.text_input("Internet/telefone", placeholder="Ex.: R$ 150")
-        estrutura_manutencao = st.text_input("Manutencao", placeholder="Ex.: R$ 600")
-    with col2:
-        estrutura_combustivel = st.text_input("Combustivel", placeholder="Ex.: R$ 900")
-        estrutura_financiamentos = st.text_input("Financiamentos", placeholder="Ex.: R$ 2.300")
-        estrutura_impostos = st.text_input("Impostos", placeholder="Ex.: R$ 400")
-        estrutura_funcionarios_fixos = st.text_input("Funcionarios fixos", placeholder="Ex.: R$ 3.200")
-    submitted_fixos = st.form_submit_button("Enviar Custos fixos")
-
-if submitted_fixos:
-    save_cost_block(
-        "custos_fixos",
-        "Custos fixos",
-        {
-            "estrutura_energia_eletrica_mensal": estrutura_energia_eletrica_mensal,
-            "estrutura_agua_mensal": estrutura_agua_mensal,
-            "estrutura_internet_telefone": estrutura_internet_telefone,
-            "estrutura_manutencao": estrutura_manutencao,
-            "estrutura_combustivel": estrutura_combustivel,
-            "estrutura_financiamentos": estrutura_financiamentos,
-            "estrutura_impostos": estrutura_impostos,
-            "estrutura_funcionarios_fixos": estrutura_funcionarios_fixos,
-        },
-    )
-
-with st.form("form_custos_variaveis_producao", clear_on_submit=True):
-    st.markdown("### Custos variaveis | Producao")
-    col1, col2 = st.columns(2)
-    with col1:
-        producao_sal = st.text_input("Sal", placeholder="Ex.: R$ 180/mes")
-        producao_coalho = st.text_input("Coalho", placeholder="Ex.: R$ 140/mes")
-        producao_embalagem = st.text_input("Embalagem", placeholder="Ex.: R$ 220/mes")
-        producao_etiqueta = st.text_input("Etiqueta", placeholder="Ex.: R$ 90/mes")
-    with col2:
-        producao_transporte = st.text_input("Transporte", placeholder="Ex.: R$ 350/mes")
-        producao_frete = st.text_input("Frete", placeholder="Ex.: R$ 500/mes")
-        producao_insumos_limpeza = st.text_input("Insumos de limpeza", placeholder="Ex.: R$ 160/mes")
-    submitted_variaveis_producao = st.form_submit_button("Enviar Custos variaveis | Producao")
-
-if submitted_variaveis_producao:
-    save_cost_block(
-        "custos_variaveis",
-        "Custos variaveis | Producao",
-        {
-            "producao_sal": producao_sal,
-            "producao_coalho": producao_coalho,
-            "producao_embalagem": producao_embalagem,
-            "producao_etiqueta": producao_etiqueta,
-            "producao_transporte": producao_transporte,
-            "producao_frete": producao_frete,
-            "producao_insumos_limpeza": producao_insumos_limpeza,
-        },
-    )
-
-with st.form("form_custos_variaveis_alimentacao", clear_on_submit=True):
-    st.markdown("### Custos variaveis | Alimentacao")
-    col1, col2 = st.columns(2)
-    with col1:
-        alimentacao_racao = st.text_input("Racao", placeholder="Ex.: R$ 4.500/mes")
-        alimentacao_milho = st.text_input("Milho", placeholder="Ex.: R$ 1.800/mes")
-        alimentacao_silagem = st.text_input("Silagem", placeholder="Ex.: R$ 2.200/mes")
-    with col2:
-        alimentacao_suplemento_mineral = st.text_input("Suplemento mineral", placeholder="Ex.: R$ 480/mes")
-        alimentacao_pastagem_arrendada = st.text_input("Pastagem arrendada", placeholder="Ex.: R$ 1.200/mes")
-    submitted_variaveis_alimentacao = st.form_submit_button("Enviar Custos variaveis | Alimentacao")
-
-if submitted_variaveis_alimentacao:
-    save_cost_block(
-        "custos_variaveis",
-        "Custos variaveis | Alimentacao",
-        {
-            "alimentacao_racao": alimentacao_racao,
-            "alimentacao_milho": alimentacao_milho,
-            "alimentacao_silagem": alimentacao_silagem,
-            "alimentacao_suplemento_mineral": alimentacao_suplemento_mineral,
-            "alimentacao_pastagem_arrendada": alimentacao_pastagem_arrendada,
-        },
-    )
+render_field_group(
+    table="custos_variaveis",
+    title="Custos variaveis | Alimentacao",
+    fields=[
+        {"name": "alimentacao_racao", "label": "Racao", "placeholder": "Ex.: R$ 4.500/mes", "form_key": "alimentacao_racao_custos"},
+        {"name": "alimentacao_milho", "label": "Milho", "placeholder": "Ex.: R$ 1.800/mes", "form_key": "alimentacao_milho_custos"},
+        {"name": "alimentacao_silagem", "label": "Silagem", "placeholder": "Ex.: R$ 2.200/mes", "form_key": "alimentacao_silagem_custos"},
+        {"name": "alimentacao_suplemento_mineral", "label": "Suplemento mineral", "placeholder": "Ex.: R$ 480/mes", "form_key": "alimentacao_suplemento_mineral"},
+        {"name": "alimentacao_pastagem_arrendada", "label": "Pastagem arrendada", "placeholder": "Ex.: R$ 1.200/mes", "form_key": "alimentacao_pastagem_arrendada"},
+    ],
+)

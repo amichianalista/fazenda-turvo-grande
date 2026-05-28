@@ -275,6 +275,7 @@ def _theme_css() -> str:
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 28px;
             padding: 1.35rem 1.35rem 0.9rem 1.35rem;
+            margin-bottom: 1.1rem;
             box-shadow: var(--shadow), var(--glass-highlight);
             backdrop-filter: blur(5px);
         }}
@@ -327,6 +328,7 @@ def _theme_css() -> str:
             border-radius: 999px;
             font-weight: 800;
             padding: 0.62rem 1.1rem;
+            width: 100%;
         }}
 
         div[data-testid="stFormSubmitButton"] button:hover {{
