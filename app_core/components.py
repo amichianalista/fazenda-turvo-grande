@@ -9,6 +9,15 @@ import streamlit as st
 
 from app_core.data import BACKGROUND_IMAGE
 
+PAGE_NAV_ITEMS = [
+    {"path": "pages/1_Visao_Executiva.py", "label": "Pagina 1", "title": "Visao Executiva"},
+    {"path": "pages/2_Producao.py", "label": "Pagina 2", "title": "Producao"},
+    {"path": "pages/3_Custos.py", "label": "Pagina 3", "title": "Custos"},
+    {"path": "pages/4_Mao_de_Obra.py", "label": "Pagina 4", "title": "Mao de Obra"},
+    {"path": "pages/5_Resultado_Financeiro.py", "label": "Pagina 5", "title": "Resultado Financeiro"},
+    {"path": "pages/6_Comercial.py", "label": "Pagina 6", "title": "Comercial"},
+]
+
 
 @lru_cache(maxsize=8)
 def _image_data_uri(path: str) -> str:
@@ -83,29 +92,24 @@ def _theme_css() -> str:
             display: none;
         }}
 
-        .page-nav-shell {{
+        .st-key-page_nav_shell {{
             position: fixed;
             top: 0.75rem;
             left: 0;
             right: 0;
             z-index: 1000;
-            display: flex;
-            justify-content: center;
+            width: min(100%, 760px);
+            margin: 0 auto;
             padding: 0 0.75rem;
-            pointer-events: none;
         }}
 
-        .page-nav-box {{
-            width: min(100%, 760px);
+        .st-key-page_nav_shell > div {{
             background: rgba(9, 23, 13, 0.66);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 22px;
             padding: 0.7rem;
             backdrop-filter: blur(12px);
             box-shadow: 0 16px 28px rgba(7, 17, 10, 0.14), var(--glass-highlight);
-            pointer-events: auto;
-            display: grid;
-            gap: 0.55rem;
         }}
 
         .page-nav-kicker {{
@@ -115,47 +119,160 @@ def _theme_css() -> str:
             letter-spacing: 0.16em;
             text-transform: uppercase;
             padding: 0 0.2rem;
+            margin-bottom: 0.55rem;
         }}
 
-        .page-nav-list {{
+        .st-key-page_nav_shell div[role="radiogroup"] {{
             display: grid;
             gap: 0.45rem;
         }}
 
-        .page-nav-item {{
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.8rem;
-            text-decoration: none;
-            color: #fff7ea;
+        .st-key-page_nav_shell label[data-baseweb="radio"] {{
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 0.78rem 0.95rem;
-            min-height: 3.25rem;
+            margin: 0;
+            min-height: 3.1rem;
+            transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
         }}
 
-        .page-nav-item.is-active {{
+        .st-key-page_nav_shell label[data-baseweb="radio"]:has(input:checked) {{
             background: linear-gradient(90deg, rgba(48, 100, 64, 0.95), rgba(199, 154, 71, 0.58));
             border-color: rgba(255, 255, 255, 0.12);
         }}
 
-        .page-nav-title {{
+        .st-key-page_nav_shell label[data-baseweb="radio"]:hover {{
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.16);
+        }}
+
+        .st-key-page_nav_shell label[data-baseweb="radio"] > div:first-child {{
+            display: none;
+        }}
+
+        .st-key-page_nav_shell label[data-baseweb="radio"] p {{
             color: #fff7ea;
             font-family: var(--display-font);
             font-size: clamp(1.02rem, 1.6vw, 1.18rem);
             font-weight: 800;
             line-height: 1.05;
+            margin: 0;
         }}
 
-        .page-nav-badge {{
-            color: rgba(255, 247, 234, 0.92);
-            font-size: 0.72rem;
+        .st-key-page_nav_shell label[data-baseweb="radio"] span {{
+            color: rgba(255, 247, 234, 0.94);
+        }}
+
+        .form-intro {{
+            background: linear-gradient(145deg, rgba(9, 23, 13, 0.12), rgba(22, 48, 29, 0.06));
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 30px;
+            box-shadow: 0 14px 26px rgba(7, 17, 10, 0.09), var(--glass-highlight);
+            padding: 1.6rem 1.65rem;
+            margin-bottom: 1.25rem;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .form-intro::after {{
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at right top, rgba(214, 175, 98, 0.12), transparent 30%),
+                linear-gradient(90deg, rgba(214, 175, 98, 0.05), transparent 46%);
+            pointer-events: none;
+        }}
+
+        .form-intro > * {{
+            position: relative;
+            z-index: 1;
+        }}
+
+        .form-intro-kicker {{
+            color: #e0bc79;
+            font-size: 0.74rem;
             font-weight: 800;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            white-space: nowrap;
+        }}
+
+        .form-intro-title {{
+            color: #fff7ea;
+            font-family: var(--display-font);
+            font-size: clamp(2rem, 4vw, 3.1rem);
+            font-weight: 800;
+            line-height: 0.98;
+            margin-top: 0.55rem;
+            max-width: 860px;
+        }}
+
+        .form-intro-copy {{
+            color: rgba(255, 247, 234, 0.82);
+            font-size: 0.97rem;
+            line-height: 1.7;
+            margin-top: 0.8rem;
+            max-width: 860px;
+        }}
+
+        .form-intro-tags {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin-top: 1rem;
+        }}
+
+        .form-intro-tag {{
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff7ea;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.42rem 0.7rem;
+        }}
+
+        div[data-testid="stForm"] {{
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 28px;
+            padding: 1rem 1rem 0.5rem 1rem;
+            box-shadow: var(--shadow), var(--glass-highlight);
+            backdrop-filter: blur(5px);
+        }}
+
+        div[data-testid="stForm"] [data-testid="stMarkdownContainer"] p,
+        div[data-testid="stForm"] label p {{
+            color: #fff7ea;
+        }}
+
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea {{
+            background: rgba(255, 251, 243, 0.07) !important;
+            color: #fff7ea !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 16px !important;
+        }}
+
+        div[data-testid="stTextInput"] input::placeholder,
+        div[data-testid="stTextArea"] textarea::placeholder {{
+            color: rgba(255, 247, 234, 0.48) !important;
+        }}
+
+        div[data-testid="stFormSubmitButton"] button {{
+            background: linear-gradient(90deg, #2f6944, #c79a47);
+            color: #fff7ea;
+            border: 0;
+            border-radius: 999px;
+            font-weight: 800;
+            padding: 0.62rem 1.1rem;
+        }}
+
+        div[data-testid="stFormSubmitButton"] button:hover {{
+            background: linear-gradient(90deg, #3a7a51, #d0a455);
+            color: #fff7ea;
         }}
 
         .topline {{
@@ -513,25 +630,17 @@ def _theme_css() -> str:
 
         @media (max-width: 640px) {{
             .block-container {{
-                padding-top: 7.2rem;
+                padding-top: 9.1rem;
             }}
 
-            .page-nav-shell {{
+            .st-key-page_nav_shell {{
                 top: 0.55rem;
                 padding: 0 0.55rem;
             }}
 
-            .page-nav-box {{
+            .st-key-page_nav_shell > div {{
                 border-radius: 18px;
                 padding: 0.6rem;
-            }}
-
-            .page-nav-item {{
-                padding: 0.72rem 0.85rem;
-            }}
-
-            .page-nav-title {{
-                font-size: 0.98rem;
             }}
         }}
     </style>
@@ -548,19 +657,46 @@ def apply_theme(page_title: str, page_icon: str) -> None:
     st.markdown(_theme_css(), unsafe_allow_html=True)
 
 
+def render_page_nav(active_page: str) -> None:
+    option_map = {f"{item['label']}  |  {item['title']}": item["path"] for item in PAGE_NAV_ITEMS}
+    labels = list(option_map)
+    active_label = next(
+        (label for label, path in option_map.items() if path == active_page),
+        labels[0],
+    )
+
+    with st.container(key="page_nav_shell"):
+        st.markdown('<div class="page-nav-kicker">Paginas</div>', unsafe_allow_html=True)
+        selected = st.radio(
+            "Paginas",
+            labels,
+            index=labels.index(active_label),
+            key=f"page_nav_{active_page}",
+            label_visibility="collapsed",
+        )
+
+    if selected != active_label:
+        st.switch_page(option_map[selected])
+
+
 def sidebar_context(page_title: str, page_copy: str) -> None:
+    render_page_nav("pages/1_Visao_Executiva.py")
+
+
+def form_intro(kicker: str, title: str, copy: str, tags: list[str] | None = None) -> None:
+    tags_html = ""
+    if tags:
+        tags_html = '<div class="form-intro-tags">' + "".join(
+            f'<span class="form-intro-tag">{tag}</span>' for tag in tags
+        ) + "</div>"
+
     st.markdown(
         f"""
-        <div class="page-nav-shell">
-            <div class="page-nav-box">
-                <div class="page-nav-kicker">Paginas</div>
-                <div class="page-nav-list">
-                    <a class="page-nav-item is-active" href="/">
-                        <div class="page-nav-title">{page_title}</div>
-                        <div class="page-nav-badge">Ativa</div>
-                    </a>
-                </div>
-            </div>
+        <div class="form-intro">
+            <div class="form-intro-kicker">{kicker}</div>
+            <div class="form-intro-title">{title}</div>
+            <div class="form-intro-copy">{copy}</div>
+            {tags_html}
         </div>
         """,
         unsafe_allow_html=True,
