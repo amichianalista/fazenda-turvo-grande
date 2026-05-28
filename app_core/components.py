@@ -315,6 +315,10 @@ def _theme_css() -> str:
             margin-bottom: 0.95rem;
         }}
 
+        div[data-testid="stForm"] [data-testid="InputInstructions"] {{
+            display: none !important;
+        }}
+
         div[data-testid="stTextInput"] input,
         div[data-testid="stTextArea"] textarea {{
             background: rgba(255, 251, 243, 0.07) !important;
