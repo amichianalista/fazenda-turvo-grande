@@ -7,7 +7,7 @@ from app_core.db import insert_row, payload_has_values
 from app_core.data import identity_context
 
 
-apply_theme(page_title="Turvo Grande | Producao", page_icon="🧀")
+apply_theme(page_title="Turvo Grande | Producao", page_icon="ðŸ§€")
 render_page_nav("pages/2_Producao.py")
 
 identity = identity_context()
@@ -31,9 +31,23 @@ form_intro(
     tags=["Rebanho", "Leite", "Queijo", "Processo"],
 )
 
-source_note("Esqueleto inicial do formulario. O proximo passo sera ligar este envio ao Supabase.")
 
-with st.form("form_producao", clear_on_submit=True):
+def save_producao_block(block_title: str, payload: dict[str, str | None]) -> None:
+    if not payload_has_values(payload):
+        st.warning(f"Preencha pelo menos um campo em {block_title.lower()} antes de enviar.")
+        return
+
+    try:
+        record_id = insert_row("producao", payload)
+    except Exception as exc:
+        st.error(f"Nao foi possivel salvar o bloco {block_title.lower()} no Supabase: {exc}")
+    else:
+        st.success(f"{block_title} enviado com sucesso. ID do registro: {record_id}")
+
+
+source_note("Cada bloco abaixo pode ser enviado separadamente. Cada envio gera um novo registro parcial.")
+
+with st.form("form_producao_rebanho", clear_on_submit=True):
     st.markdown("### Rebanho")
     col1, col2 = st.columns(2)
     with col1:
@@ -44,7 +58,22 @@ with st.form("form_producao", clear_on_submit=True):
         rebanho_novilhas = st.text_input("Novilhas", placeholder="Ex.: 8")
         rebanho_bezerras = st.text_input("Bezerras", placeholder="Ex.: 6")
         rebanho_touros = st.text_input("Touros", placeholder="Ex.: 2")
+    submitted_rebanho = st.form_submit_button("Enviar Rebanho")
 
+if submitted_rebanho:
+    save_producao_block(
+        "Rebanho",
+        {
+            "rebanho_quantidade_total_vacas": rebanho_quantidade_total_vacas,
+            "rebanho_vacas_lactacao": rebanho_vacas_lactacao,
+            "rebanho_vacas_secas": rebanho_vacas_secas,
+            "rebanho_novilhas": rebanho_novilhas,
+            "rebanho_bezerras": rebanho_bezerras,
+            "rebanho_touros": rebanho_touros,
+        },
+    )
+
+with st.form("form_producao_leiteira", clear_on_submit=True):
     st.markdown("### Producao leiteira")
     col1, col2 = st.columns(2)
     with col1:
@@ -57,7 +86,21 @@ with st.form("form_producao", clear_on_submit=True):
     with col2:
         producao_leite_producao_seca = st.text_input("Producao na seca", placeholder="Ex.: 340 litros/dia")
         producao_leite_producao_aguas = st.text_input("Producao nas aguas", placeholder="Ex.: 470 litros/dia")
+    submitted_producao_leiteira = st.form_submit_button("Enviar Producao leiteira")
 
+if submitted_producao_leiteira:
+    save_producao_block(
+        "Producao leiteira",
+        {
+            "producao_leite_litros_dia": producao_leite_litros_dia,
+            "producao_leite_media_vaca_dia": producao_leite_media_vaca_dia,
+            "producao_leite_pico_producao": producao_leite_pico_producao,
+            "producao_leite_producao_seca": producao_leite_producao_seca,
+            "producao_leite_producao_aguas": producao_leite_producao_aguas,
+        },
+    )
+
+with st.form("form_qualidade_leite", clear_on_submit=True):
     st.markdown("### Qualidade do leite")
     col1, col2 = st.columns(2)
     with col1:
@@ -71,7 +114,22 @@ with st.form("form_producao", clear_on_submit=True):
             placeholder="Ex.: 4 C",
         )
         qualidade_leite_perdas_leite = st.text_input("Perdas de leite", placeholder="Ex.: 10 litros/semana")
+    submitted_qualidade_leite = st.form_submit_button("Enviar Qualidade do leite")
 
+if submitted_qualidade_leite:
+    save_producao_block(
+        "Qualidade do leite",
+        {
+            "qualidade_leite_gordura_pct": qualidade_leite_gordura_pct,
+            "qualidade_leite_proteina_pct": qualidade_leite_proteina_pct,
+            "qualidade_leite_ccs": qualidade_leite_ccs,
+            "qualidade_leite_cbt": qualidade_leite_cbt,
+            "qualidade_leite_temperatura_armazenamento": qualidade_leite_temperatura_armazenamento,
+            "qualidade_leite_perdas_leite": qualidade_leite_perdas_leite,
+        },
+    )
+
+with st.form("form_alimentacao", clear_on_submit=True):
     st.markdown("### Alimentacao")
     col1, col2 = st.columns(2)
     with col1:
@@ -84,7 +142,21 @@ with st.form("form_producao", clear_on_submit=True):
             "Producao propria ou compra insumos?",
             placeholder="Ex.: Mistura de producao propria e compra",
         )
+    submitted_alimentacao = st.form_submit_button("Enviar Alimentacao")
 
+if submitted_alimentacao:
+    save_producao_block(
+        "Alimentacao",
+        {
+            "alimentacao_tipo_pastagem": alimentacao_tipo_pastagem,
+            "alimentacao_usa_silagem": alimentacao_usa_silagem,
+            "alimentacao_usa_racao": alimentacao_usa_racao,
+            "alimentacao_custo_mensal": alimentacao_custo_mensal,
+            "alimentacao_producao_propria_ou_compra_insumos": alimentacao_producao_propria_ou_compra_insumos,
+        },
+    )
+
+with st.form("form_producao_queijo", clear_on_submit=True):
     st.markdown("### Producao do queijo")
     col1, col2 = st.columns(2)
     with col1:
@@ -100,7 +172,21 @@ with st.form("form_producao", clear_on_submit=True):
         producao_queijo_peso_medio_por_queijo = st.text_input("Peso medio por queijo", placeholder="Ex.: 1,0 kg")
         producao_queijo_producao_semanal = st.text_input("Producao semanal", placeholder="Ex.: 154 queijos/semana")
         producao_queijo_producao_mensal = st.text_input("Producao mensal", placeholder="Ex.: 616 queijos/mes")
+    submitted_producao_queijo = st.form_submit_button("Enviar Producao do queijo")
 
+if submitted_producao_queijo:
+    save_producao_block(
+        "Producao do queijo",
+        {
+            "producao_queijo_dias_producao_semana": producao_queijo_dias_producao_semana,
+            "producao_queijo_quantidade_queijos_dia": producao_queijo_quantidade_queijos_dia,
+            "producao_queijo_peso_medio_por_queijo": producao_queijo_peso_medio_por_queijo,
+            "producao_queijo_producao_semanal": producao_queijo_producao_semanal,
+            "producao_queijo_producao_mensal": producao_queijo_producao_mensal,
+        },
+    )
+
+with st.form("form_processo_produtivo", clear_on_submit=True):
     st.markdown("### Processo produtivo")
     col1, col2 = st.columns(2)
     with col1:
@@ -121,53 +207,18 @@ with st.form("form_producao", clear_on_submit=True):
             "Tipo de fermentacao/pingo",
             placeholder="Ex.: Pingo tradicional",
         )
+    submitted_processo_produtivo = st.form_submit_button("Enviar Processo produtivo")
 
-    submitted = st.form_submit_button("Salvar estrutura de Producao")
-
-if submitted:
-    payload = {
-        "rebanho_quantidade_total_vacas": rebanho_quantidade_total_vacas,
-        "rebanho_vacas_lactacao": rebanho_vacas_lactacao,
-        "rebanho_vacas_secas": rebanho_vacas_secas,
-        "rebanho_novilhas": rebanho_novilhas,
-        "rebanho_bezerras": rebanho_bezerras,
-        "rebanho_touros": rebanho_touros,
-        "producao_leite_litros_dia": producao_leite_litros_dia,
-        "producao_leite_media_vaca_dia": producao_leite_media_vaca_dia,
-        "producao_leite_pico_producao": producao_leite_pico_producao,
-        "producao_leite_producao_seca": producao_leite_producao_seca,
-        "producao_leite_producao_aguas": producao_leite_producao_aguas,
-        "qualidade_leite_gordura_pct": qualidade_leite_gordura_pct,
-        "qualidade_leite_proteina_pct": qualidade_leite_proteina_pct,
-        "qualidade_leite_ccs": qualidade_leite_ccs,
-        "qualidade_leite_cbt": qualidade_leite_cbt,
-        "qualidade_leite_temperatura_armazenamento": qualidade_leite_temperatura_armazenamento,
-        "qualidade_leite_perdas_leite": qualidade_leite_perdas_leite,
-        "alimentacao_tipo_pastagem": alimentacao_tipo_pastagem,
-        "alimentacao_usa_silagem": alimentacao_usa_silagem,
-        "alimentacao_usa_racao": alimentacao_usa_racao,
-        "alimentacao_custo_mensal": alimentacao_custo_mensal,
-        "alimentacao_producao_propria_ou_compra_insumos": alimentacao_producao_propria_ou_compra_insumos,
-        "producao_queijo_dias_producao_semana": producao_queijo_dias_producao_semana,
-        "producao_queijo_quantidade_queijos_dia": producao_queijo_quantidade_queijos_dia,
-        "producao_queijo_peso_medio_por_queijo": producao_queijo_peso_medio_por_queijo,
-        "producao_queijo_producao_semanal": producao_queijo_producao_semanal,
-        "producao_queijo_producao_mensal": producao_queijo_producao_mensal,
-        "processo_produtivo_tempo_maturacao": processo_produtivo_tempo_maturacao,
-        "processo_produtivo_quantidade_perdida_maturacao": processo_produtivo_quantidade_perdida_maturacao,
-        "processo_produtivo_percentual_descartado": processo_produtivo_percentual_descartado,
-        "processo_produtivo_producao_diaria_ou_lotes": processo_produtivo_producao_diaria_ou_lotes,
-        "processo_produtivo_usa_leite_cru": processo_produtivo_usa_leite_cru,
-        "processo_produtivo_tipo_coalho": processo_produtivo_tipo_coalho,
-        "processo_produtivo_tipo_fermentacao_pingo": processo_produtivo_tipo_fermentacao_pingo,
-    }
-
-    if not payload_has_values(payload):
-        st.warning("Preencha pelo menos um campo antes de enviar.")
-    else:
-        try:
-            record_id = insert_row("producao", payload)
-        except Exception as exc:
-            st.error(f"Nao foi possivel salvar a producao no Supabase: {exc}")
-        else:
-            st.success(f"Producao salva no banco com sucesso. ID do registro: {record_id}")
+if submitted_processo_produtivo:
+    save_producao_block(
+        "Processo produtivo",
+        {
+            "processo_produtivo_tempo_maturacao": processo_produtivo_tempo_maturacao,
+            "processo_produtivo_quantidade_perdida_maturacao": processo_produtivo_quantidade_perdida_maturacao,
+            "processo_produtivo_percentual_descartado": processo_produtivo_percentual_descartado,
+            "processo_produtivo_producao_diaria_ou_lotes": processo_produtivo_producao_diaria_ou_lotes,
+            "processo_produtivo_usa_leite_cru": processo_produtivo_usa_leite_cru,
+            "processo_produtivo_tipo_coalho": processo_produtivo_tipo_coalho,
+            "processo_produtivo_tipo_fermentacao_pingo": processo_produtivo_tipo_fermentacao_pingo,
+        },
+    )

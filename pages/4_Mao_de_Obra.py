@@ -7,7 +7,7 @@ from app_core.db import insert_row, payload_has_values
 from app_core.data import identity_context
 
 
-apply_theme(page_title="Turvo Grande | Mao de Obra", page_icon="🧀")
+apply_theme(page_title="Turvo Grande | Mao de Obra", page_icon="ðŸ§€")
 render_page_nav("pages/4_Mao_de_Obra.py")
 
 identity = identity_context()
@@ -31,33 +31,51 @@ form_intro(
     tags=["Equipe", "Familia", "Funcionarios", "Rotina"],
 )
 
-source_note("Este formulario cobre os campos ja modelados na tabela de mao de obra.")
 
-with st.form("form_mao_de_obra", clear_on_submit=True):
+def save_mao_de_obra_block(block_title: str, payload: dict[str, str | None]) -> None:
+    if not payload_has_values(payload):
+        st.warning(f"Preencha pelo menos um campo em {block_title.lower()} antes de enviar.")
+        return
+
+    try:
+        record_id = insert_row("mao_de_obra", payload)
+    except Exception as exc:
+        st.error(f"Nao foi possivel salvar o bloco {block_title.lower()} no Supabase: {exc}")
+    else:
+        st.success(f"{block_title} enviado com sucesso. ID do registro: {record_id}")
+
+
+source_note("Cada bloco abaixo pode ser enviado separadamente. Cada envio gera um novo registro parcial.")
+
+with st.form("form_mao_de_obra_equipe", clear_on_submit=True):
+    st.markdown("### Equipe atual")
     col1, col2 = st.columns(2)
     with col1:
         quantas_pessoas_trabalham = st.text_input("Quantas pessoas trabalham?", placeholder="Ex.: 4")
         quantas_pessoas_da_familia = st.text_input("Quantas da familia?", placeholder="Ex.: 2")
     with col2:
         quantos_funcionarios = st.text_input("Quantos funcionarios?", placeholder="Ex.: 2")
-        horas_por_dia_na_producao = st.text_input("Horas por dia na producao?", placeholder="Ex.: 8 horas")
+    submitted_equipe = st.form_submit_button("Enviar Equipe atual")
 
-    submitted = st.form_submit_button("Salvar estrutura de Mao de Obra")
+if submitted_equipe:
+    save_mao_de_obra_block(
+        "Equipe atual",
+        {
+            "quantas_pessoas_trabalham": quantas_pessoas_trabalham,
+            "quantas_pessoas_da_familia": quantas_pessoas_da_familia,
+            "quantos_funcionarios": quantos_funcionarios,
+        },
+    )
 
-if submitted:
-    payload = {
-        "quantas_pessoas_trabalham": quantas_pessoas_trabalham,
-        "quantas_pessoas_da_familia": quantas_pessoas_da_familia,
-        "quantos_funcionarios": quantos_funcionarios,
-        "horas_por_dia_na_producao": horas_por_dia_na_producao,
-    }
+with st.form("form_mao_de_obra_rotina", clear_on_submit=True):
+    st.markdown("### Rotina de producao")
+    horas_por_dia_na_producao = st.text_input("Horas por dia na producao?", placeholder="Ex.: 8 horas")
+    submitted_rotina = st.form_submit_button("Enviar Rotina de producao")
 
-    if not payload_has_values(payload):
-        st.warning("Preencha pelo menos um campo antes de enviar.")
-    else:
-        try:
-            record_id = insert_row("mao_de_obra", payload)
-        except Exception as exc:
-            st.error(f"Nao foi possivel salvar a mao de obra no Supabase: {exc}")
-        else:
-            st.success(f"Mao de obra salva no banco com sucesso. ID do registro: {record_id}")
+if submitted_rotina:
+    save_mao_de_obra_block(
+        "Rotina de producao",
+        {
+            "horas_por_dia_na_producao": horas_por_dia_na_producao,
+        },
+    )
