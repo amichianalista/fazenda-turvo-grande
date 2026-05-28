@@ -62,8 +62,6 @@ render_field_group(
     fields=[
         {"name": "qualidade_leite_gordura_pct", "label": "Gordura (%)", "placeholder": "Ex.: 3,8%", "form_key": "qualidade_leite_gordura_pct"},
         {"name": "qualidade_leite_proteina_pct", "label": "Proteina (%)", "placeholder": "Ex.: 3,2%", "form_key": "qualidade_leite_proteina_pct"},
-        {"name": "qualidade_leite_ccs", "label": "CCS", "placeholder": "Ex.: 250.000", "form_key": "qualidade_leite_ccs"},
-        {"name": "qualidade_leite_cbt", "label": "CBT", "placeholder": "Ex.: 20.000", "form_key": "qualidade_leite_cbt"},
         {"name": "qualidade_leite_temperatura_armazenamento", "label": "Temperatura de armazenamento", "placeholder": "Ex.: 4 C", "form_key": "qualidade_leite_temperatura_armazenamento"},
         {"name": "qualidade_leite_perdas_leite", "label": "Perdas de leite", "placeholder": "Ex.: 10 litros/semana", "form_key": "qualidade_leite_perdas_leite"},
     ],
