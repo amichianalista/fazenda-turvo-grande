@@ -10,11 +10,11 @@ import streamlit as st
 from app_core.data import BACKGROUND_IMAGE
 
 PAGE_NAV_ITEMS = [
-    {"path": "pages/1_Visao_Executiva.py", "label": "Pagina 1", "title": "Visao Executiva"},
-    {"path": "pages/2_Producao.py", "label": "Pagina 2", "title": "Producao"},
+    {"path": "pages/1_Visao_Executiva.py", "label": "Pagina 1", "title": "Visão Executiva"},
+    {"path": "pages/2_Producao.py", "label": "Pagina 2", "title": "Produção"},
     {"path": "pages/3_Custos.py", "label": "Pagina 3", "title": "Custos"},
-    {"path": "pages/4_Mao_de_Obra.py", "label": "Pagina 4", "title": "Mao de Obra"},
-    {"path": "pages/5_Resultado_Financeiro.py", "label": "Pagina 5", "title": "Resultado Financeiro"},
+    {"path": "pages/4_Mao_de_Obra.py", "label": "Pagina 4", "title": "Mão de Obra"},
+    {"path": "pages/5_Resultado_Financeiro.py", "label": "Pagina 5", "title": "Financeiro"},
     {"path": "pages/6_Comercial.py", "label": "Pagina 6", "title": "Comercial"},
 ]
 
@@ -107,9 +107,16 @@ def _theme_css() -> str:
             background: rgba(9, 23, 13, 0.66);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 22px;
-            padding: 0.7rem;
+            padding: 0.7rem 0.9rem;
             backdrop-filter: blur(12px);
             box-shadow: 0 16px 28px rgba(7, 17, 10, 0.14), var(--glass-highlight);
+        }}
+
+        .page-nav-row {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
         }}
 
         .page-nav-kicker {{
@@ -119,49 +126,54 @@ def _theme_css() -> str:
             letter-spacing: 0.16em;
             text-transform: uppercase;
             padding: 0 0.2rem;
-            margin-bottom: 0.55rem;
+            white-space: nowrap;
         }}
 
-        .st-key-page_nav_shell div[role="radiogroup"] {{
-            display: grid;
-            gap: 0.45rem;
+        .st-key-page_nav_shell [data-testid="stSelectbox"] {{
+            min-width: 0;
         }}
 
-        .st-key-page_nav_shell label[data-baseweb="radio"] {{
+        .st-key-page_nav_shell [data-baseweb="select"] > div {{
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            padding: 0.78rem 0.95rem;
-            margin: 0;
-            min-height: 3.1rem;
+            min-height: 3rem;
             transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
         }}
 
-        .st-key-page_nav_shell label[data-baseweb="radio"]:has(input:checked) {{
-            background: linear-gradient(90deg, rgba(48, 100, 64, 0.95), rgba(199, 154, 71, 0.58));
-            border-color: rgba(255, 255, 255, 0.12);
-        }}
-
-        .st-key-page_nav_shell label[data-baseweb="radio"]:hover {{
+        .st-key-page_nav_shell [data-baseweb="select"] > div:hover {{
             transform: translateY(-1px);
             border-color: rgba(255, 255, 255, 0.16);
         }}
 
-        .st-key-page_nav_shell label[data-baseweb="radio"] > div:first-child {{
-            display: none;
+        .st-key-page_nav_shell [data-baseweb="select"] span {{
+            color: #fff7ea;
         }}
 
-        .st-key-page_nav_shell label[data-baseweb="radio"] p {{
+        .st-key-page_nav_shell [data-baseweb="select"] input {{
             color: #fff7ea;
             font-family: var(--display-font);
-            font-size: clamp(1.02rem, 1.6vw, 1.18rem);
+            font-size: clamp(0.98rem, 1.5vw, 1.08rem);
             font-weight: 800;
-            line-height: 1.05;
-            margin: 0;
         }}
 
-        .st-key-page_nav_shell label[data-baseweb="radio"] span {{
-            color: rgba(255, 247, 234, 0.94);
+        .st-key-page_nav_shell [data-baseweb="popover"] {{
+            border-radius: 18px;
+            overflow: hidden;
+        }}
+
+        .st-key-page_nav_shell [role="listbox"] {{
+            background: rgba(9, 23, 13, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }}
+
+        .st-key-page_nav_shell [role="option"] {{
+            color: #fff7ea;
+            font-family: var(--body-font);
+        }}
+
+        .st-key-page_nav_shell [role="option"][aria-selected="true"] {{
+            background: linear-gradient(90deg, rgba(48, 100, 64, 0.95), rgba(199, 154, 71, 0.58));
         }}
 
         .form-intro {{
@@ -642,6 +654,11 @@ def _theme_css() -> str:
                 border-radius: 18px;
                 padding: 0.6rem;
             }}
+
+            .page-nav-row {{
+                flex-direction: column;
+                align-items: stretch;
+            }}
         }}
     </style>
     """
@@ -658,7 +675,7 @@ def apply_theme(page_title: str, page_icon: str) -> None:
 
 
 def render_page_nav(active_page: str) -> None:
-    option_map = {f"{item['label']}  |  {item['title']}": item["path"] for item in PAGE_NAV_ITEMS}
+    option_map = {item["title"]: item["path"] for item in PAGE_NAV_ITEMS}
     labels = list(option_map)
     active_label = next(
         (label for label, path in option_map.items() if path == active_page),
@@ -666,14 +683,17 @@ def render_page_nav(active_page: str) -> None:
     )
 
     with st.container(key="page_nav_shell"):
-        st.markdown('<div class="page-nav-kicker">Paginas</div>', unsafe_allow_html=True)
-        selected = st.radio(
-            "Paginas",
-            labels,
-            index=labels.index(active_label),
-            key=f"page_nav_{active_page}",
-            label_visibility="collapsed",
-        )
+        left_col, right_col = st.columns([1, 2.6], vertical_alignment="center")
+        with left_col:
+            st.markdown('<div class="page-nav-kicker">Paginas</div>', unsafe_allow_html=True)
+        with right_col:
+            selected = st.selectbox(
+                "Paginas",
+                labels,
+                index=labels.index(active_label),
+                key=f"page_nav_{active_page}",
+                label_visibility="collapsed",
+            )
 
     if selected != active_label:
         st.switch_page(option_map[selected])
