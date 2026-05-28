@@ -169,18 +169,35 @@ def _theme_css() -> str:
             overflow: hidden;
         }}
 
+        .st-key-page_nav_shell [data-baseweb="popover"] > div {{
+            background: rgba(9, 23, 13, 0.96) !important;
+        }}
+
         .st-key-page_nav_shell [role="listbox"] {{
-            background: rgba(9, 23, 13, 0.96);
+            background: rgba(9, 23, 13, 0.96) !important;
             border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #fff7ea !important;
         }}
 
         .st-key-page_nav_shell [role="option"] {{
-            color: #fff7ea;
+            background: transparent !important;
+            color: #fff7ea !important;
             font-family: var(--body-font);
+            font-weight: 800 !important;
+        }}
+
+        .st-key-page_nav_shell [role="option"] * {{
+            color: #fff7ea !important;
+            font-weight: 800 !important;
+        }}
+
+        .st-key-page_nav_shell [role="option"]:hover {{
+            background: rgba(255, 255, 255, 0.06) !important;
         }}
 
         .st-key-page_nav_shell [role="option"][aria-selected="true"] {{
             background: linear-gradient(90deg, rgba(48, 100, 64, 0.95), rgba(199, 154, 71, 0.58));
+            color: #fff7ea !important;
         }}
 
         .form-intro {{
