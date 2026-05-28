@@ -153,15 +153,22 @@ def _theme_css() -> str:
 
         .st-key-page_nav_shell [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
         .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"] > div,
-        .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"] {{
+        .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"],
+        .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"] *,
+        .st-key-page_nav_shell [data-baseweb="select"] > div > div,
+        .st-key-page_nav_shell [data-baseweb="select"] > div > div * {{
             color: #fff7ea !important;
+            font-weight: 800 !important;
+            opacity: 1 !important;
         }}
 
         .st-key-page_nav_shell [data-baseweb="select"] input {{
             color: #fff7ea !important;
+            -webkit-text-fill-color: #fff7ea !important;
             font-family: var(--display-font);
             font-size: clamp(0.98rem, 1.5vw, 1.08rem);
             font-weight: 800;
+            opacity: 1 !important;
         }}
 
         .st-key-page_nav_shell [data-baseweb="popover"] {{
