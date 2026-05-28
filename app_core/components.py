@@ -151,8 +151,14 @@ def _theme_css() -> str:
             color: #fff7ea;
         }}
 
+        .st-key-page_nav_shell [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
+        .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"] > div,
+        .st-key-page_nav_shell [data-baseweb="select"] div[role="combobox"] {{
+            color: #fff7ea !important;
+        }}
+
         .st-key-page_nav_shell [data-baseweb="select"] input {{
-            color: #fff7ea;
+            color: #fff7ea !important;
             font-family: var(--display-font);
             font-size: clamp(0.98rem, 1.5vw, 1.08rem);
             font-weight: 800;
@@ -251,14 +257,37 @@ def _theme_css() -> str:
             background: rgba(255, 255, 255, 0.025);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 28px;
-            padding: 1rem 1rem 0.5rem 1rem;
+            padding: 1.35rem 1.35rem 0.9rem 1.35rem;
             box-shadow: var(--shadow), var(--glass-highlight);
             backdrop-filter: blur(5px);
+        }}
+
+        div[data-testid="stForm"] [data-testid="stHorizontalBlock"] {{
+            gap: 1.35rem;
+            align-items: flex-start;
+        }}
+
+        div[data-testid="stForm"] [data-testid="column"] {{
+            gap: 0.25rem;
+        }}
+
+        div[data-testid="stForm"] h3 {{
+            margin-top: 1.45rem;
+            margin-bottom: 1rem;
+        }}
+
+        div[data-testid="stForm"] h3:first-of-type {{
+            margin-top: 0.2rem;
         }}
 
         div[data-testid="stForm"] [data-testid="stMarkdownContainer"] p,
         div[data-testid="stForm"] label p {{
             color: #fff7ea;
+        }}
+
+        div[data-testid="stForm"] div[data-testid="stTextInput"],
+        div[data-testid="stForm"] div[data-testid="stTextArea"] {{
+            margin-bottom: 0.95rem;
         }}
 
         div[data-testid="stTextInput"] input,
