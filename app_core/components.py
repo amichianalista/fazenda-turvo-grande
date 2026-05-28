@@ -69,61 +69,93 @@ def _theme_css() -> str:
 
         .block-container {{
             max-width: 1280px;
-            padding-top: 2.8rem;
+            padding-top: 6.8rem;
             padding-bottom: 3rem;
             position: relative;
             z-index: 1;
         }}
 
         [data-testid="stSidebar"] {{
-            background: linear-gradient(180deg, rgba(15, 34, 20, 0.92), rgba(10, 23, 14, 0.92));
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            display: none;
         }}
 
-        [data-testid="stSidebar"] * {{
-            color: #f7f2e5;
+        [data-testid="stSidebarCollapsedControl"] {{
+            display: none;
         }}
 
-        [data-testid="stSidebarNavLink"] {{
-            border-radius: 16px;
-            margin-bottom: 0.3rem;
+        .page-nav-shell {{
+            position: fixed;
+            top: 0.75rem;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 0.75rem;
+            pointer-events: none;
         }}
 
-        [data-testid="stSidebarNavLink"][aria-current="page"] {{
-            background: rgba(255, 255, 255, 0.10);
-        }}
-
-        .sidebar-box {{
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .page-nav-box {{
+            width: min(100%, 760px);
+            background: rgba(9, 23, 13, 0.66);
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 22px;
-            padding: 1rem 1rem 1.1rem 1rem;
-            margin-bottom: 1rem;
-            backdrop-filter: blur(8px);
+            padding: 0.7rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 16px 28px rgba(7, 17, 10, 0.14), var(--glass-highlight);
+            pointer-events: auto;
+            display: grid;
+            gap: 0.55rem;
         }}
 
-        .sidebar-kicker {{
+        .page-nav-kicker {{
             color: #d9b46c;
             font-size: 0.72rem;
             font-weight: 800;
             letter-spacing: 0.16em;
             text-transform: uppercase;
+            padding: 0 0.2rem;
         }}
 
-        .sidebar-title {{
+        .page-nav-list {{
+            display: grid;
+            gap: 0.45rem;
+        }}
+
+        .page-nav-item {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: #fff7ea;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0.78rem 0.95rem;
+            min-height: 3.25rem;
+        }}
+
+        .page-nav-item.is-active {{
+            background: linear-gradient(90deg, rgba(48, 100, 64, 0.95), rgba(199, 154, 71, 0.58));
+            border-color: rgba(255, 255, 255, 0.12);
+        }}
+
+        .page-nav-title {{
             color: #fff7ea;
             font-family: var(--display-font);
-            font-size: 1.3rem;
-            font-weight: 700;
-            line-height: 1.02;
-            margin-top: 0.5rem;
+            font-size: clamp(1.02rem, 1.6vw, 1.18rem);
+            font-weight: 800;
+            line-height: 1.05;
         }}
 
-        .sidebar-copy {{
-            color: rgba(255, 247, 234, 0.80);
-            font-size: 0.93rem;
-            line-height: 1.58;
-            margin-top: 0.7rem;
+        .page-nav-badge {{
+            color: rgba(255, 247, 234, 0.92);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            white-space: nowrap;
         }}
 
         .topline {{
@@ -471,11 +503,35 @@ def _theme_css() -> str:
 
         @media (min-width: 1200px) {{
             .block-container {{
-                padding-top: 3.4rem;
+                padding-top: 7.4rem;
             }}
 
             .hero-shell {{
                 margin-top: 0.7rem;
+            }}
+        }}
+
+        @media (max-width: 640px) {{
+            .block-container {{
+                padding-top: 7.2rem;
+            }}
+
+            .page-nav-shell {{
+                top: 0.55rem;
+                padding: 0 0.55rem;
+            }}
+
+            .page-nav-box {{
+                border-radius: 18px;
+                padding: 0.6rem;
+            }}
+
+            .page-nav-item {{
+                padding: 0.72rem 0.85rem;
+            }}
+
+            .page-nav-title {{
+                font-size: 0.98rem;
             }}
         }}
     </style>
@@ -487,18 +543,24 @@ def apply_theme(page_title: str, page_icon: str) -> None:
         page_title=page_title,
         page_icon=page_icon,
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
     st.markdown(_theme_css(), unsafe_allow_html=True)
 
 
 def sidebar_context(page_title: str, page_copy: str) -> None:
-    st.sidebar.markdown(
+    st.markdown(
         f"""
-        <div class="sidebar-box">
-            <div class="sidebar-kicker">Turvo Grande</div>
-            <div class="sidebar-title">{page_title}</div>
-            <div class="sidebar-copy">{page_copy}</div>
+        <div class="page-nav-shell">
+            <div class="page-nav-box">
+                <div class="page-nav-kicker">Paginas</div>
+                <div class="page-nav-list">
+                    <a class="page-nav-item is-active" href="/">
+                        <div class="page-nav-title">{page_title}</div>
+                        <div class="page-nav-badge">Ativa</div>
+                    </a>
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
