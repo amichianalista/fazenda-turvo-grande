@@ -318,7 +318,8 @@ def _theme_css() -> str:
         div[data-testid="stTextInput"] input,
         div[data-testid="stTextArea"] textarea {{
             background: rgba(255, 251, 243, 0.07) !important;
-            color: #fff7ea !important;
+            color: #111111 !important;
+            -webkit-text-fill-color: #111111 !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
             border-radius: 16px !important;
         }}
