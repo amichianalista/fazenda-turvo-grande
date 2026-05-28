@@ -78,7 +78,7 @@ def _theme_css() -> str:
 
         .block-container {{
             max-width: 1280px;
-            padding-top: 6.8rem;
+            padding-top: 10rem;
             padding-bottom: 3rem;
             position: relative;
             z-index: 1;
@@ -94,7 +94,7 @@ def _theme_css() -> str:
 
         .st-key-page_nav_shell {{
             position: fixed;
-            top: 0.75rem;
+            top: 3.85rem;
             left: 0;
             right: 0;
             z-index: 1000;
@@ -107,7 +107,7 @@ def _theme_css() -> str:
             background: rgba(9, 23, 13, 0.66);
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 22px;
-            padding: 0.7rem 0.9rem;
+            padding: 0.8rem 0.95rem;
             backdrop-filter: blur(12px);
             box-shadow: 0 16px 28px rgba(7, 17, 10, 0.14), var(--glass-highlight);
         }}
@@ -131,13 +131,14 @@ def _theme_css() -> str:
 
         .st-key-page_nav_shell [data-testid="stSelectbox"] {{
             min-width: 0;
+            margin-top: 0.08rem;
         }}
 
         .st-key-page_nav_shell [data-baseweb="select"] > div {{
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            min-height: 3rem;
+            min-height: 3.15rem;
             transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
         }}
 
@@ -632,7 +633,7 @@ def _theme_css() -> str:
 
         @media (min-width: 1200px) {{
             .block-container {{
-                padding-top: 7.4rem;
+                padding-top: 10.4rem;
             }}
 
             .hero-shell {{
@@ -642,11 +643,11 @@ def _theme_css() -> str:
 
         @media (max-width: 640px) {{
             .block-container {{
-                padding-top: 9.1rem;
+                padding-top: 11.2rem;
             }}
 
             .st-key-page_nav_shell {{
-                top: 0.55rem;
+                top: 3.5rem;
                 padding: 0 0.55rem;
             }}
 
